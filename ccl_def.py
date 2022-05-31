@@ -1,5 +1,5 @@
 
-# Should replace rdsl & system consrtaint file
+# Should replace rdsl & system constraint file
 
 # - functions runtime
 functions_run_time = [
