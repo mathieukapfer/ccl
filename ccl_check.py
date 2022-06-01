@@ -1,11 +1,16 @@
-from ccl_def import *
+from ccl_def import functions_args
 
 
 # Check all 'in' streams are defined i.e. exist as 'out' streams somewhere
-# input:  functions_args
-# return: 4 dictionnaries
 def check_streams_defined():
-    """  Check streams coherancy """
+    '''
+    Check all 'in' parameters is defined and
+    return dict of in and out parameters
+
+         input:   functions_args
+         returns: 4 dictionnary (see below)
+
+    '''
     params_in = set()
     params_out = set()
     # build (in,fct) and (out, fct)
@@ -35,6 +40,3 @@ def check_streams_defined():
             table_param_out,  # key: param, val: fct with param as output (assuming one)
             table_fct_in,     # key: fct,   val: [param as input]
             table_fct_out)    # key: fct,   val: param as output (assuming one)
-
-
-    
