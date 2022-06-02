@@ -11,13 +11,16 @@ def check_streams_defined():
          returns: 4 dictionnary (see below)
 
     '''
+    # set of in and out paramters
     params_in = set()
     params_out = set()
-    # build (in,fct) and (out, fct)
+
+    # dict of parameters vs functions
     table_param_in = dict()
     table_param_out = dict()
     table_fct_in = dict()
     table_fct_out = dict()
+
     for (fct, params) in functions_args:
         for (in_out, param) in params:
             if (in_out == "in"):
@@ -30,11 +33,15 @@ def check_streams_defined():
                 # set to dict val (assuming one)
                 table_param_out[param] = fct
                 table_fct_out[fct] = param
+
     # test if all 'in' param is existing in 'out' set
-    if (params_in < params_out):
+    if (params_in <= params_out):
         print("Check: All streams are defined")
     else:
-        print("Error: Stream(s) not defined:{}".format(params_out - params_in ))
+        print("Error: Stream(s) not defined: {}".format(params_out - params_in))
+        print(" in:  {} ".format(params_in))
+        print(" out: {} ".format(params_out))
+
     # return dict
     return (table_param_in,   # key: param, val: [fct with param as input]
             table_param_out,  # key: param, val: fct with param as output (assuming one)
