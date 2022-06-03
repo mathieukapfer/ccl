@@ -35,22 +35,9 @@ streams = {
 }
 
 
-# - functions list
-functions_list = [
-        "getSoftBitsData_cfunc"
-        "getUserBLPInfo_cfunc",
-        "extract_data_cblk_info_cfunc",
-        "descrambler_cfunc",
-        "soft_bits_data_demux_cfunc",
-        "ldpc_decoder_cfunc",
-        "rate_dematch_cfunc",
-        "cbl_concat_tblkcrc_generate_cfunc",
-        "putUserTBLKData_cfunc",
-]
-
 # - function prototypes
 functions_args = [
-    # bufs creation
+    # buffers creation
     ("buffer_ldpc_cfunc",            [("out", "buffer_ldpc")]),
     ("stub_rate0_cfunc",             [("out", "buffer_rate0")]),
     ("stub_rate1_cfunc",             [("out", "buffer_rate1")]),
@@ -60,8 +47,24 @@ functions_args = [
     ("descrambler_cfunc",            [("in", "soft_bits_per_ue"), ("in", "blp_info_per_ue"), ("out", "descramble_soft_bits_per_ue")]),
     ("extract_data_cblk_info_cfunc", [("in", "blp_info_per_ue"), ("out", "data_cblk_list")]),
     ("soft_bits_data_demux_cfunc",   [("in", "descramble_soft_bits_per_ue"), ("in", "data_cblk_list"), ("out", "soft_bits_data_cblk")]),
-    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk"), ("in", "data_cblk_list"), ("out", "rate_dematch")]),
+    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk"), ("in", "data_cblk_list"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("out", "rate_dematch")]),
     ("ldpc_decoder_cfunc",           [("in", "data_cblk_list"), ("in", "rate_dematch"), ("in", "buffer_ldpc"), ("out", "dbit")]),
-    ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit"), ("in", "data_cblk_list"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("out", "tblk")]),
+    ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit"), ("in", "data_cblk_list"), ("out", "tblk")]),
     ("putUserTBLKData_cfunc",        [("in", "tblk"), ("out", "end")]),
     ]
+
+
+# - functions execution model
+functions_list = [
+    ('buffer_ldpc_cfunc',                    []),
+    ('stub_rate0_cfunc',                     []),
+    ('stub_rate1_cfunc',                     []),
+    ('getSoftBitsData_cfunc',                []),
+    ('getUserBLPInfo_cfunc',                 []),
+    ('descrambler_cfunc',                    []),
+    ('extract_data_cblk_info_cfunc',         [('table', 2)]),  # generate two streams
+    ('soft_bits_data_demux_cfunc',           [('table', 2)]),  # generate two streams
+    ('rate_dematch_cfunc',                   [('phase', [0, 1])]),
+    ('ldpc_decoder_cfunc',                   [('phase', [1])]),
+    ('cbl_concat_tblkcrc_generate_cfunc',    [('phase', [1])]),
+    ('putUserTBLKData_cfunc',                [('phase', [1])])]
