@@ -18,8 +18,6 @@ def check_streams_defined():
     # dict of parameters vs functions
     table_param_in = dict()
     table_param_out = dict()
-    table_fct_in = dict()
-    table_fct_out = dict()
 
     for (fct, params) in functions_args:
         for (in_out, param) in params:
@@ -27,12 +25,10 @@ def check_streams_defined():
                 params_in.add(param)
                 # append to dict val
                 table_param_in[param] = table_param_in.get(param, []) + [fct]
-                table_fct_in[fct] = table_fct_in.get(fct, []) + [param]
             else:
                 params_out.add(param)
                 # set to dict val (assuming one)
                 table_param_out[param] = fct
-                table_fct_out[fct] = param
 
     # test if all 'in' param is existing in 'out' set
     if (params_in <= params_out):
@@ -43,7 +39,6 @@ def check_streams_defined():
         print(" out: {} ".format(params_out))
 
     # return dict
-    return (table_param_in,   # key: param, val: [fct with param as input]
-            table_param_out,  # key: param, val: fct with param as output (assuming one)
-            table_fct_in,     # key: fct,   val: [param as input]
-            table_fct_out)    # key: fct,   val: param as output (assuming one)
+    return (table_param_in,   # key: param, val: fct consumer
+            table_param_out  # key: param, val: fct producer (assuming one only)
+            )
