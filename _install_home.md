@@ -1,5 +1,6 @@
- 2004  pip install networkx
- 2005  pip install matplotlib
- 2007  sudo apt install graphviz
- 2008  sudo apt install graphviz.dev
- 2021  pip install pygraphviz
+sudo apt install python3-tk
+sudo apt install graphviz graphviz.dev python3-dev
+
+pip install networkx
+pip install matplotlib
+pip install pygraphviz

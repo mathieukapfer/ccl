@@ -55,7 +55,7 @@ functions_args = [
 
 
 # - functions execution model
-functions_list = [
+functions_execution_model = [
     ('buffer_ldpc_cfunc',                    []),
     ('stub_rate0_cfunc',                     []),
     ('stub_rate1_cfunc',                     []),

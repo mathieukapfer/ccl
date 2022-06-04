@@ -33,9 +33,10 @@ def build_stream_graph():
     for (fct, params) in functions_args:
         for param_in in [param for (in_out, param) in params if in_out == 'in']:
             for param_out in [param for (in_out, param) in params if in_out == 'out']:
-                G.add_edges_from([(param_in, param_out,
-                                   {'weight': functions_run_time[fct],
-                                    'fct': fct})])
+                G.add_node(param_out)
+                G.nodes[param_out]['weight'] = functions_run_time[fct]
+                G.nodes[param_out]['fct'] = fct
+                G.add_edge(param_in, param_out)
     # add root parameters
     for param in [x for x in G.nodes() if G.out_degree(x) >= 1 and G.in_degree(x) == 0]:
         G.add_edge("start", param)
@@ -74,11 +75,16 @@ def draw_graph(G, ax='none', critical_path='none'):
     ax.margins(0.2)
 
 
-# figure, axis = plt.subplots(1, 1)
-plt.figure(1)
-draw_graph(build_fct_graph(), critical_path='none')
+def draw_my_graph():
+    """ draw fct and data graph """
+    # figure, axis = plt.subplots(1, 1)
+    plt.figure(1)
+    draw_graph(build_fct_graph(), critical_path='none')
 
-plt.figure(2)
-draw_graph(build_stream_graph(), critical_path='yes')
+    plt.figure(2)
+    draw_graph(build_stream_graph(), critical_path='yes')
 
-plt.show(block=False)
+    plt.show(block=False)
+
+
+#draw_my_graph()
