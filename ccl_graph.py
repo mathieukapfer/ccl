@@ -29,26 +29,28 @@ def build_stream_graph(display = False):
     G = nx.DiGraph()
 
     # param as node, fct as edge:
-    # for each function, link output parameter (assuming one) and input parameters
+    # for each function, link output parameter and input parameters
     for (fct, params) in functions_args:
-        for param_in in [param for (in_out, param) in params if in_out == 'in']:
+        param_in_list = [param for (in_out, param) in params if in_out == 'in']
+
+        if len(param_in_list) == 0:
+            # no input parameter => add node 'start'
+            param_in_list = ['start']
+
+        for param_in in param_in_list:
             for param_out in [param for (in_out, param) in params if in_out == 'out']:
-                # create node
+                # create 'stream' node with producer and size
                 G.add_nodes_from([ (param_out, {
                     'size': streams[param_out],  # G.nodes[param_out]['size'] = streams[param_out]
                     'fct': fct,                  # G.nodes[param_out]['fct'] = fct
                 }
                 ), ])
 
-                # create edges
+                # create edges with producer run time
                 G.add_edges_from([ (param_in, param_out, {
                     'weight': functions_run_time[fct]
                 }
                 ), ])
-
-    # add root parameters
-    for param in [x for x in G.nodes() if G.out_degree(x) >= 1 and G.in_degree(x) == 0]:
-        G.add_edge("start", param)
 
     # display
     if (display):
@@ -72,6 +74,7 @@ def draw_graph(G, ax='none', critical_path='none'):
         # draw critical path in red
         critical_path = nx.dag_longest_path(G, weight='weight')
         print("Info: Longest Path: ", nx.dag_longest_path_length(G, weight='weight'))
+        print(critical_path)
         node_color = ["red" if n in critical_path else "blue" for n in G.nodes()]
         nx.draw_networkx_nodes(G, pos, node_color=node_color, node_size=200)
 

@@ -40,5 +40,5 @@ def check_streams_defined():
 
     # return dict
     return (table_param_in,   # key: param, val: fct consumer
-            table_param_out  # key: param, val: fct producer (assuming one only)
+            table_param_out   # key: param, val: fct producer (assuming one only)
             )

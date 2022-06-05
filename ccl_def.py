@@ -52,7 +52,7 @@ functions_args = [
     ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk"), ("in", "data_cblk_list"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("out", "rate_dematch")]),
     ("ldpc_decoder_cfunc",           [("in", "data_cblk_list"), ("in", "rate_dematch"), ("in", "buffer_ldpc"), ("out", "dbit")]),
     ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit"), ("in", "data_cblk_list"), ("out", "tblk")]),
-    ("putUserTBLKData_cfunc",        [("in", "tblk"), ("out", "end")]),
+    ("putUserTBLKData_cfunc",        [("in", "tblk")]),
     ]
 
 
