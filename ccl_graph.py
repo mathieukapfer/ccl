@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
+
 from ccl_check import check_streams_defined
 from ccl_def import functions_run_time, functions_args, streams
 
@@ -99,6 +100,9 @@ def draw_my_graph():
     draw_graph(build_fct_graph(), critical_path='none')
 
     plt.figure(2)
+    draw_graph(build_stream_graph(), critical_path='yes')
+
+    plt.figure(3)
     draw_graph(build_stream_graph(), critical_path='yes')
 
     plt.show(block=False)

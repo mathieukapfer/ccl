@@ -57,16 +57,17 @@ functions_args = [
 
 
 # - functions execution model
-functions_execution_model = [
-    ('buffer_ldpc_cfunc',                    []),
-    ('stub_rate0_cfunc',                     []),
-    ('stub_rate1_cfunc',                     []),
-    ('getSoftBitsData_cfunc',                []),
-    ('getUserBLPInfo_cfunc',                 []),
-    ('descrambler_cfunc',                    []),
-    ('extract_data_cblk_info_cfunc',         [('table', 2)]),  # generate two streams
-    ('soft_bits_data_demux_cfunc',           [('table', 2)]),  # generate two streams
-    ('rate_dematch_cfunc',                   [('phase', [0, 1])]),
-    ('ldpc_decoder_cfunc',                   [('phase', [1])]),
-    ('cbl_concat_tblkcrc_generate_cfunc',    [('phase', [1])]),
-    ('putUserTBLKData_cfunc',                [('phase', [1])])]
+functions_execution_model = {
+    'buffer_ldpc_cfunc':                    {},
+    'stub_rate0_cfunc':                     {},
+    'stub_rate1_cfunc':                     {},
+    'getSoftBitsData_cfunc':                {},
+    'getUserBLPInfo_cfunc':                 {},
+    'descrambler_cfunc':                    {},
+    'extract_data_cblk_info_cfunc':         {'table': 2},  # generate two streams
+    'soft_bits_data_demux_cfunc':           {'table': 2},  # generate two streams
+    'rate_dematch_cfunc':                   {'table': 2, 'phase': [0, 1]},
+    'ldpc_decoder_cfunc':                   {'table': 2, 'phase': [1]},
+    'cbl_concat_tblkcrc_generate_cfunc':    {'phase': [1]},
+    'putUserTBLKData_cfunc':                {'phase': [1]},
+}
