@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 from ccl_check import check_streams_defined
-from ccl_def import functions_run_time, functions_args
+from ccl_def import functions_run_time, functions_args, streams
 
 def build_fct_graph():
     """ Build DAG with function as node """
@@ -24,7 +24,7 @@ def build_fct_graph():
     return G
 
 
-def build_stream_graph():
+def build_stream_graph(display = False):
     """ Build DAG with stream as node """
     G = nx.DiGraph()
 
@@ -33,13 +33,27 @@ def build_stream_graph():
     for (fct, params) in functions_args:
         for param_in in [param for (in_out, param) in params if in_out == 'in']:
             for param_out in [param for (in_out, param) in params if in_out == 'out']:
-                G.add_node(param_out)
-                G.nodes[param_out]['weight'] = functions_run_time[fct]
-                G.nodes[param_out]['fct'] = fct
-                G.add_edge(param_in, param_out)
+                # create node
+                G.add_nodes_from([ (param_out, {
+                    'size': streams[param_out],  # G.nodes[param_out]['size'] = streams[param_out]
+                    'fct': fct,                  # G.nodes[param_out]['fct'] = fct
+                }
+                ), ])
+
+                # create edges
+                G.add_edges_from([ (param_in, param_out, {
+                    'weight': functions_run_time[fct]
+                }
+                ), ])
+
     # add root parameters
     for param in [x for x in G.nodes() if G.out_degree(x) >= 1 and G.in_degree(x) == 0]:
         G.add_edge("start", param)
+
+    # display
+    if (display):
+        print("nodes:{}".format(G.nodes(data=True)))
+        print("edges:{}".format(G.edges(data=True)))
 
     return G
 

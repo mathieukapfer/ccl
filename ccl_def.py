@@ -32,6 +32,8 @@ streams = {
     "data_cblk_list": 256,
     "rate_dematch": 16848,
     "dbit": 16848,
+    "tblk": 9999, # to be updated !!!!
+    "end": 0,
 }
 
 
