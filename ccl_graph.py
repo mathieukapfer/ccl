@@ -25,7 +25,7 @@ def build_fct_graph():
     return G
 
 
-def build_stream_graph(display = False):
+def build_stream_graph(display=False):
     """ Build DAG with stream as node """
     G = nx.DiGraph()
 
@@ -70,14 +70,14 @@ def draw_graph(G, ax='none', critical_path='none'):
 
     # draw node
     if (critical_path == 'none'):
-        nx.draw_networkx_nodes(G, pos, node_size=200)
+        nx.draw_networkx_nodes(G, pos, node_size=300)
     else:
         # draw critical path in red
-        critical_path = nx.dag_longest_path(G, weight='weight')
-        print("Info: Longest Path: ", nx.dag_longest_path_length(G, weight='weight'))
+        critical_path = nx.dag_longest_path(G) #, weight='weight')
+        print("Info: Longest Path: ", nx.dag_longest_path_length(G)) # , weight='weight'))
         print(critical_path)
         node_color = ["red" if n in critical_path else "blue" for n in G.nodes()]
-        nx.draw_networkx_nodes(G, pos, node_color=node_color, node_size=200)
+        nx.draw_networkx_nodes(G, pos, node_color=node_color, node_size=300)
 
     # draw edge
     nx.draw_networkx_edges(G, pos, width=2)
@@ -86,7 +86,7 @@ def draw_graph(G, ax='none', critical_path='none'):
     nx.draw_networkx_labels(G, pos, font_size=10, font_family="sans-serif")
 
     # figure and axes
-    if (ax == 'none'):
+    if ax == 'none':
         ax = plt.gca()
 
     # margin
@@ -102,10 +102,21 @@ def draw_my_graph():
     plt.figure(2)
     draw_graph(build_stream_graph(), critical_path='yes')
 
-    plt.figure(3)
-    draw_graph(build_stream_graph(), critical_path='yes')
-
     plt.show(block=False)
 
 
+def write_dot(G):
+    """
+    Save networkx graph in dot file format.
+    Use 'xdot out.dot' command to display it
+
+       input: G: graph in networkx fomat to be converted
+
+    """
+    my_dot = nx.nx_pydot.to_pydot(G)
+    my_dot.write_raw("out_raw.dot")
+
+
+
+write_dot(build_stream_graph(display=True))
 #draw_my_graph()
