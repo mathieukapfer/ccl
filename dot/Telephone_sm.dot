@@ -1,0 +1,314 @@
+digraph Telephone {
+
+    node
+        [shape=Mrecord width=1.5];
+
+    subgraph cluster_CallMap {
+
+        label="CallMap";
+
+        //
+        // States (Nodes)
+        //
+
+        "CallMap::Initialized"
+            [label="{Initialized|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::Initialized\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::Initialized\");\l|Default()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Default\");\l}"];
+
+        "CallMap::OnHook"
+            [label="{OnHook|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::OnHook\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"updateClock()\");\l&nbsp;&nbsp;&nbsp;updateClock();\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startClockTimer()\");\l&nbsp;&nbsp;&nbsp;startClockTimer();\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::OnHook\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"ClockTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"ClockTimer\");\l|ClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"ClockTimer\");\l&nbsp;&nbsp;&nbsp;writeTransAction(\"updateClock()\");\l&nbsp;&nbsp;&nbsp;updateClock();\l&nbsp;&nbsp;&nbsp;writeTransAction(\"startClockTimer()\");\l&nbsp;&nbsp;&nbsp;startClockTimer();\lDigit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\l}"];
+
+        "CallMap::Routing"
+            [label="{Routing|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::Routing\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::Routing\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::NYCTemp"
+            [label="{NYCTemp|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::NYCTemp\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"ringing\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"RingTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"RingTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::NYCTemp\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopTimer(\\\"RingTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"RingTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopLoop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"ringing\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::Time"
+            [label="{Time|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::Time\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"ringing\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"RingTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"RingTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::Time\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopTimer(\\\"RingTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"RingTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopLoop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"ringing\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::DepositMoney"
+            [label="{DepositMoney|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::DepositMoney\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"ringing\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"RingTimer\\\", 5000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"RingTimer\", 5000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::DepositMoney\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopTimer(\\\"RingTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"RingTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopLoop(\\\"ringing\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"ringing\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::BusySignal"
+            [label="{BusySignal|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::BusySignal\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"busy\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"busy\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::BusySignal\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"stopLoop(\\\"busy\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"busy\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::PlayingMessage"
+            [label="{PlayingMessage|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::PlayingMessage\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::PlayingMessage\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::MessagePlayed"
+            [label="{MessagePlayed|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::MessagePlayed\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::MessagePlayed\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|Digit(n: String)/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::Digit(\" + n + \")\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"CallMap::Default::ClockTimer\");\l}"];
+
+        "CallMap::LeftOffHook"
+            [label="{LeftOffHook|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::LeftOffHook\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"LoopTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"LoopTimer\", 10000);\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"phone_off_hook\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"phone_off_hook\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::MessagePlayed\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"LoopTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"LoopTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopLoop(\\\"phone_off_hook\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"phone_off_hook\");\l|Default()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Default\");\l}"];
+
+        "CallMap::InvalidDigit"
+            [label="{InvalidDigit|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::InvalidDigit\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"LoopTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"LoopTimer\", 10000);\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"fast_busy\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"fast_busy\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::MessagePlayed\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"LoopTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"LoopTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopLoop(\\\"phone_off_hook\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"fast_busy\");\l|Default()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Default\");\l}"];
+
+        "CallMap::WaitForOnHook"
+            [label="{WaitForOnHook|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::WaitForOnHook\");\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::WaitForOnHook\");\l|Default()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Default\");\l}"];
+
+        "CallMap::OnHook::PhoneNumber"
+            [label="{PhoneNumber|O-O\r}"]
+
+        "%start"
+            [label="" shape=circle style=filled fillcolor=black width=0.25];
+
+    }
+
+    subgraph cluster_PhoneNumber {
+
+        label="PhoneNumber";
+
+        //
+        // States (Nodes)
+        //
+
+        "PhoneNumber::DialTone"
+            [label="{DialTone|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering PhoneNumber::DialTone\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"loop(\\\"dialtone\\\")\");\l&nbsp;&nbsp;&nbsp;loop(\"dialtone\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting PhoneNumber::DialTone\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopLoop(\\\"dialtone\\\")\");\l&nbsp;&nbsp;&nbsp;stopLoop(\"dialtone\");\l|ClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::LongDistance"
+            [label="{LongDistance|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering PhoneNumber::LongDistance\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting PhoneNumber::LongDistance\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|Digit(n: String)\l\[ctxt.isCodeComplete() == false\]/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Digit(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;writeTransAction(\"playTT(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;playTT(n);\l&nbsp;&nbsp;&nbsp;writeTransAction(\"saveAreaCode(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;saveAreaCode(n);\l&nbsp;&nbsp;&nbsp;writeTransAction(\"resetTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;resetTimer(\"OffHookTimer\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::NineOneOneStart"
+            [label="{NineOneOneStart|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering PhoneNumber::NineOneOneStart\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting PhoneNumber::NineOneOneStart\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|ClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::NineOne"
+            [label="{NineOne|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering PhoneNumber::NineOne\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting PhoneNumber::NineOne\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|ClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::Exchange"
+            [label="{Exchange|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering PhoneNumber::Exchange\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting PhoneNumber::Exchange\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|Digit(n: String)\l\[ctxt.isExchangeComplete() == false\]/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Digit(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;writeTransAction(\"playTT(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;playTT(n);\l&nbsp;&nbsp;&nbsp;writeTransAction(\"saveExchange(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;saveExchange(n);\l&nbsp;&nbsp;&nbsp;writeTransition(\"resetTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;resetTimer(\"OffHookTimer\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::LocalCall"
+            [label="{LocalCall|Entry/\l&nbsp;&nbsp;&nbsp;writeState(\"Entering CallMap::LocalCall\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Entry\", \"startTimer(\\\"OffHookTimer\\\", 10000)\");\l&nbsp;&nbsp;&nbsp;startTimer(\"OffHookTimer\", 10000);\lExit/\l&nbsp;&nbsp;&nbsp;writeState(\"Exiting CallMap::LocalCall\");\l&nbsp;&nbsp;&nbsp;writeStateAction(\"Exit\", \"stopTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;stopTimer(\"OffHookTimer\");\l|Digit(n: String)\l\[ctxt.isLocalComplete() == false\]/\l&nbsp;&nbsp;&nbsp;writeTransition(\"Digit(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;writeTransAction(\"playTT(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;playTT(n);\l&nbsp;&nbsp;&nbsp;writeTransAction(\"saveLocal(\" + n + \")\");\l&nbsp;&nbsp;&nbsp;saveLocal(n);\l&nbsp;&nbsp;&nbsp;writeTransAction(\"resetTimer(\\\"OffHookTimer\\\")\");\l&nbsp;&nbsp;&nbsp;resetTimer(\"OffHookTimer\");\lClockTimer()/\l&nbsp;&nbsp;&nbsp;writeTransition(\"PhoneNumber::Default::ClockTimer\");\l}"];
+
+        "PhoneNumber::pop(Stop)"
+            [label="" width=1]
+
+        "PhoneNumber::pop(OnHook)"
+            [label="" width=1]
+
+        "PhoneNumber::pop(LeftOffHook)"
+            [label="" width=1]
+
+        "PhoneNumber::pop(DialingDone)"
+            [label="" width=1]
+
+        "PhoneNumber::%end"
+            [label="" shape=doublecircle style=filled fillcolor=black width=0.15];
+
+        "push(PhoneNumber::DialTone)"
+            [label="" shape=plaintext];
+
+    }
+
+    //
+    // Transitions (Edges)
+    //
+
+    "CallMap::Initialized" -> "CallMap::OnHook"
+        [label="Start()/\lwriteTransition(\"OnHook\");\l"];
+
+    "CallMap::OnHook" -> "CallMap::OnHook::PhoneNumber"
+        [label="OffHook()/\lwriteTransition(\"push(PhoneNumber::DialTone)\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransAction(\"setReceiver(\\\"on hook\\\", \\\"Put down receiver\\\")\");\lsetReceiver(\"on hook\", \"Put down receiver\");\lpush(PhoneNumber::DialTone)\l"];
+
+    "CallMap::OnHook" -> "CallMap::LeftOffHook"
+        [label="LeftOffHook()/\lwriteTransition(\"LeftOffHook\");\l"];
+
+    "CallMap::OnHook" -> "CallMap::InvalidDigit"
+        [label="InvalidDigit()/\lwriteTransition(\"InvalidDigit\");\l"];
+
+    "CallMap::OnHook" -> "CallMap::Routing"
+        [label="DialingDone()/\lwriteTransition(\"DialingDone\");\lwriteTransAction(\"routeCall()\");\lrouteCall();\l"];
+
+    "CallMap::OnHook" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::OnHook" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::Routing" -> "CallMap::PlayingMessage"
+        [label="Emergency()/\lwriteTransition(\"Emergency\");\lwriteTransAction(\"playEmergency()\");\lplayEmergency();\l"];
+
+    "CallMap::Routing" -> "CallMap::NYCTemp"
+        [label="NYCTemp()/\lwriteTransition(\"NYCTemp\");\l"];
+
+    "CallMap::Routing" -> "CallMap::Time"
+        [label="Time()/\lwriteTransition(\"Time\");\l"];
+
+    "CallMap::Routing" -> "CallMap::DepositMoney"
+        [label="DepositMoney()/\lwriteTransition(\"DepositMoney\");\l"];
+
+    "CallMap::Routing" -> "CallMap::BusySignal"
+        [label="LineBusy()/\lwriteTransition(\"LineBusy\");\l"];
+
+    "CallMap::Routing" -> "CallMap::PlayingMessage"
+        [label="InvalidNumber()/\lwriteTransition(\"InvalidNumber\");\lwriteTransAction(\"playInvalidNumber()\");\lplayInvalidNumber();\l"];
+
+    "CallMap::Routing" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::Routing" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::NYCTemp" -> "CallMap::PlayingMessage"
+        [label="RingTimer()/\lwriteTransition(\"RingTimer\");\lwriteTransAction(\"playNYCTemp()\");\lplayNYCTemp();\l"];
+
+    "CallMap::NYCTemp" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::NYCTemp" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::Time" -> "CallMap::PlayingMessage"
+        [label="RingTimer()/\lwriteTransition(\"RingTimer\");\lwriteTransAction(\"playTime()\");\lplayTime();\l"];
+
+    "CallMap::Time" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::Time" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::DepositMoney" -> "CallMap::PlayingMessage"
+        [label="RingTimer()/\lplayDepositMoney();\l"];
+
+    "CallMap::DepositMoney" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::DepositMoney" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::BusySignal" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::BusySignal" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::PlayingMessage" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"OnHook\");\lwriteTransAction(\"stopPlayback()\");\lstopPlayback();\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::PlayingMessage" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"Stop\");\lwriteTransAction(\"stopPlayback()\");\lstopPlayback();\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::PlayingMessage" -> "CallMap::MessagePlayed"
+        [label="PlaybackDone()/\lwriteTransition(\"PlaybackDone\");\l"];
+
+    "CallMap::MessagePlayed" -> "CallMap::LeftOffHook"
+        [label="OffHookTimer()/\lwriteTransition(\"OffHookTimer\");\l"];
+
+    "CallMap::MessagePlayed" -> "CallMap::OnHook"
+        [label="OnHook()/\lwriteTransition(\"CallMap::Default::OnHook\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::MessagePlayed" -> "CallMap::Initialized"
+        [label="Stop()/\lwriteTransition(\"CallMap::Default::Stop\");\lwriteTransAction(\"setReceiver(\\\"off hook\\\", \\\"Pick up receiver\\\")\");\lsetReceiver(\"off hook\", \"Pick up receiver\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\l"];
+
+    "CallMap::LeftOffHook" -> "CallMap::WaitForOnHook"
+        [label="LoopTimer()/\lwriteTransition(\"WaitForOnHook\");\l"];
+
+    "CallMap::InvalidDigit" -> "CallMap::WaitForOnHook"
+        [label="LoopTimer()/\lwriteTransition(\"LoopTimer\");\l"];
+
+    "CallMap::OnHook::PhoneNumber" -> "CallMap::OnHook"
+        [label="pop/"]
+
+    "%start" -> "CallMap::Initialized"
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::LongDistance"
+        [label="Digit(n: String)\l\[ctxt.equal(n, 1) == true\]/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"setType(Telephone.LONG_DISTANCE)\");\lsetType(Telephone.LONG_DISTANCE);\lwriteTransAction(\"saveAreaCode(\" + n + \")\");\lsaveAreaCode(n);\lwriteTransAction(\"addDisplay(\\\"-\\\")\");\laddDisplay(\"-\");\l"];
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::NineOneOneStart"
+        [label="Digit(n: String)\l\[ctxt.equal(n, 9) == true\]/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\l"];
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::Exchange"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"setType(Telephone.LOCAL)\");\lsetType(Telephone.LOCAL);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\l"];
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::DialTone" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::LongDistance" -> "PhoneNumber::Exchange"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"saveAreaCode(\" + n + \")\");\lsaveAreaCode(n);\lwriteTransAction(\"addDisplay(\\\"-\\\")\");\laddDisplay(\"-\");\l"];
+
+    "PhoneNumber::LongDistance" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::LongDistance" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::LongDistance" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::NineOneOneStart" -> "PhoneNumber::NineOne"
+        [label="Digit(n: String)\l\[ctxt.equal(n, 1) == true\]/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"saveAreaCode(\" + n + \")\");\lsaveExchange(n);\l"];
+
+    "PhoneNumber::NineOneOneStart" -> "PhoneNumber::Exchange"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"setType(Telephone.LOCAL)\");\lsetType(Telephone.LOCAL);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\l"];
+
+    "PhoneNumber::NineOneOneStart" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::NineOneOneStart" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::NineOneOneStart" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::NineOne" -> "PhoneNumber::pop(DialingDone)"
+        [label="Digit(n: String)\l\[ctxt.equal(n, 1) == true\]/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"setType(Telephone.EMERGENCY)\");\lsetType(Telephone.EMERGENCY);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\lwriteTransition(\"pop(DialingDone)\");\l"];
+
+    "PhoneNumber::NineOne" -> "PhoneNumber::LocalCall"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"setType(Telephone.LOCAL)\");\lsetType(Telephone.LOCAL);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\lwriteTransAction(\"addDisplay(\\\"-\\\")\");\laddDisplay(\"-\");\l"];
+
+    "PhoneNumber::NineOne" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::NineOne" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::NineOne" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::Exchange" -> "PhoneNumber::LocalCall"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"saveExchange(\" + n + \")\");\lsaveExchange(n);\lwriteTransAction(\"addDisplay(\\\"-\\\")\");\laddDisplay(\"-\");\l"];
+
+    "PhoneNumber::Exchange" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::Exchange" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::Exchange" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::LocalCall" -> "PhoneNumber::pop(DialingDone)"
+        [label="Digit(n: String)/\lwriteTransition(\"Digit(\" + n + \")\");\lwriteTransAction(\"playTT(\" + n + \")\");\lplayTT(n);\lwriteTransAction(\"saveLocal(\" + n + \")\");\lsaveLocal(n);\lwriteTransition(\"pop(DialingDone)\");\l"];
+
+    "PhoneNumber::LocalCall" -> "PhoneNumber::pop(LeftOffHook)"
+        [label="OffHookTimer()/\lwriteTransition(\"PhoneNumber::Default::OffHookTimer\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(LeftOffHook)\");\l"];
+
+    "PhoneNumber::LocalCall" -> "PhoneNumber::pop(OnHook)"
+        [label="OnHook()/\lwriteTransition(\"PhoneNumber::Default::OnHook\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(OnHook)\");\l"];
+
+    "PhoneNumber::LocalCall" -> "PhoneNumber::pop(Stop)"
+        [label="Stop()/\lwriteTransition(\"PhoneNumber::Default::Stop\");\lwriteTransAction(\"clearDisplay()\");\lclearDisplay();\lwriteTransition(\"pop(Stop)\");\l"];
+
+    "PhoneNumber::pop(Stop)" -> "PhoneNumber::%end"
+        [label="pop(Stop);\l"];
+
+    "PhoneNumber::pop(OnHook)" -> "PhoneNumber::%end"
+        [label="pop(OnHook);\l"];
+
+    "PhoneNumber::pop(LeftOffHook)" -> "PhoneNumber::%end"
+        [label="pop(LeftOffHook);\l"];
+
+    "PhoneNumber::pop(DialingDone)" -> "PhoneNumber::%end"
+        [label="pop(DialingDone);\l"];
+
+    "push(PhoneNumber::DialTone)" -> "PhoneNumber::DialTone"
+        [arrowtail=odot];
+
+}
