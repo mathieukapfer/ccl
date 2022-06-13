@@ -2,16 +2,16 @@ import re
 import networkx as nx
 
 
-def parse_action(line, keys, cur_dict):
+def parse_keys(line, keys, cur_dict, clear=False):
     """
     Parse line:
     [phase = 0, 1]
-    [action = cbl_concat_tblkcrc_generate_cfunc], [elementsize = 36668],[runtime = 40000], [definition_ID(arg#) = 3(4)],
+    [action = cbl_concat_tblkcrc_generate_cfunc], [elementsize = 36668], [runtime = 40000], [definition_ID(arg#) = 3(4)],
 
        Input:
           - line to parse
-          - key to parse
-          - cur_dict to complete with  [ key, val ]
+          - keys list to parse
+          - cur_dict to be completed with  [ key, val ]
 
        return: True if one key is found
 
@@ -21,6 +21,8 @@ def parse_action(line, keys, cur_dict):
         m = re.search("\[" + key + " = " + "([\w ,]+)", line)
         if m:
             ret = True
+            if clear is True:
+                cur_dict.clear()
             cur_dict[key] = m.group(1)
             print(">>>" + key + ":" + m.group(1))
 
@@ -73,6 +75,31 @@ def parse_observation_ids(line):
     return obs_ids
 
 
+def format_node_name(nodes_name, node_description):
+    """
+    Append to nodes dict a new entry to convert
+      - node id (the number of id) to
+      - node content: full name with producer action and other parameters
+    NOTE: this dictionary can be use to rename node tree with 'full name'
+
+       Input:
+         - nodes_name : the dictinnary of all node names to update
+         - node_description: the description of current node to add
+
+
+    """
+    # build dic for rename node : replace number by procuder name
+    print("\n Add node Node #{} : {}".format(node_description.get('id', 'unknown'),node_description.get('action', 'unknown')))
+    nodes_name[node_description.get('id','none')] = "{}\n ({})\n phase{}".format(
+        #\n size:{} \n runtime:{}
+        node_description.get('action'),
+        node_description.get('id'),
+        node_description.get('phase'),
+        # node_description.get('elementsize'),
+        # node_description.get('runtime'),
+    )
+
+
 def ccl_parser():
     """
     Parse CCL file
@@ -83,60 +110,81 @@ def ccl_parser():
 
     G = nx.DiGraph()
 
-    relabel_dict = dict()
-    stream_dict = dict()
+    nodes_name_dict = dict()
+    node_dict = dict()
+    nodes_dict = dict()
+
+    step = 1
 
     for line in lines:
 
-        # first parse 'phase'
-        if parse_action(line, ["phase"], stream_dict):
+        # 0) skip comment
+        if line[0] == '#':
             continue
 
-        # second parse 'action'
-        if parse_action(line, ["action", "elementsize", "runtime"], stream_dict):
+        # 1) parse phase parameters
+        # [phase = 0,1],
+        if step == 1 and parse_keys(line, ["phase"], node_dict, clear=True):
+            step += 1
+            continue
+
+        # 2) parse action paremeters
+        # [action = stub_rate1_cfunc], [elementsize = 52224],[runtime = 2000],
+        if step == 2 and parse_keys(line, ["action", "elementsize", "runtime"], node_dict):
+            step += 1
+
             # same line parse 'definition_ID'
-            parse_definition_ID(line, stream_dict)
+            # ..  [definition_ID(arg#) = 101(0)],
+            parse_definition_ID(line, node_dict)
 
-        print(line)
-        print(stream_dict)
-
-        if(len(stream_dict) >= 6):  # all key defined
-            print(line)
-            print(stream_dict)
-            # build dic for rename node : replace number by procuder name
-            # print(">>> #" + stream_dict.get('id', ''))
-            # print(">>> name" + stream_dict.get('action', ''))
-            relabel_dict[stream_dict.get('id','none')] = "{}\n ({})\n phase:{}".format( #\n size:{} \n runtime:{}
-                stream_dict.get('action'),
-                stream_dict.get('id'),
-                stream_dict.get('phase'),
-                # stream_dict.get('elementsize'),
-                # stream_dict.get('runtime'),
-            )
-
-            G.add_node(stream_dict.get('id','none'))
+            # format full name of node
+            format_node_name(nodes_name_dict, node_dict)
+            # create node for the current stream
+            G.add_node(node_dict.get('id','none'))
+            # next line
+            continue
 
 
-        # third, parse 'observation_ids' (maybe same line!)
-        ids = parse_observation_ids(line)
-        if len(ids):
-            print(line)
-            print(ids)
-            print (stream_dict)
+        # 3) parse 'observation_ids' (maybe same line!)
+        if step == 3: # optional step => no step incrementation
+            ids = parse_observation_ids(line)
+            if len(ids):
+                print(line)
+                print(ids)
+                print(node_dict)
 
-            # build graph
-            for (stream, pos) in ids:
-                print("{} -> {}({})".format(
-                    stream, stream_dict['action'], stream_dict.get('id','none')))
-                G.add_edge(stream, stream_dict.get('id', 'end'))
-
-            # reset dict
-            stream_dict = dict()
+                # create edge for each observed streams -> current stream
+                for (stream, pos) in ids:
+                    print("{} -> {}({})".format(
+                        stream, node_dict['action'], node_dict.get('id','none')))
+                    G.add_edge(stream, node_dict.get('id', 'end'))
 
 
-    print(relabel_dict)
+        # 4) parse timing parameters
+        # [define = 283], [end_define = 290], [L2toDDR = 498], [DDRtoL2 = 0], [observe_start = 3], [observe_end = 305],
+        if step == 3 and (parse_keys(line, ["define", "end_define", "L2toDDR", "DDRtoL2", "observe_start", "observe_end"], node_dict)):
+            # next line
+            step += 1
+            continue
 
-    nx.relabel_nodes(G, relabel_dict, copy=False)
+
+        # 5) parse resources parameters
+        # [defining resource = pe0_0], [define memory offset = 92232], [observe memory offset = 73386];
+        if step == 4 and (parse_keys(line, ["defining resource", "define memory offset", "observe memory offset"], node_dict)):
+
+            # complete node dict
+            nodes_dict[node_dict.get('id','unknown')] = node_dict
+            print(node_dict)
+
+            # next line
+            step = 1
+            continue
+
+
+    print(nodes_name_dict)
+    print(nodes_dict)
+
+    nx.relabel_nodes(G, nodes_name_dict, copy=False)
 
     return G
 
