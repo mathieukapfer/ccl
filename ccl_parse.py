@@ -42,6 +42,7 @@ def parse_definition_ID(line, dict_action):
     ret = False
     m = re.search("definition_ID\(arg#\)" + " = ", line)
     if m:
+        ret = True
         n = re.search("(\d+)\((\d+)\)", line[m.end():])
         dict_action['id'] = n.group(1)
         dict_action['pos'] = n.group(2)
@@ -135,18 +136,16 @@ def ccl_parser():
 
             # same line parse 'definition_ID'
             # ..  [definition_ID(arg#) = 101(0)],
-            parse_definition_ID(line, node_dict)
-
-            # format full name of node
-            format_node_name(nodes_name_dict, node_dict)
-            # create node for the current stream
-            G.add_node(node_dict.get('id','none'))
-            # next line
-            continue
-
+            if parse_definition_ID(line, node_dict) is True:
+                # format full name of node
+                format_node_name(nodes_name_dict, node_dict)
+                # create node for the current stream
+                G.add_node(node_dict.get('id','none'))
+                # next line
+                continue
 
         # 3) parse 'observation_ids' (maybe same line!)
-        if step == 3: # optional step => no step incrementation
+        if step == 3:
             ids = parse_observation_ids(line)
             if len(ids):
                 print(line)
@@ -157,7 +156,11 @@ def ccl_parser():
                 for (stream, pos) in ids:
                     print("{} -> {}({})".format(
                         stream, node_dict['action'], node_dict.get('id','none')))
-                    G.add_edge(stream, node_dict.get('id', 'end'))
+                    G.add_edge(stream, node_dict.get('id', 'none'))
+                # next
+                step += 1
+                continue
+
 
 
         # 4) parse timing parameters
@@ -179,6 +182,10 @@ def ccl_parser():
             # next line
             step = 1
             continue
+
+        # else
+        if not re.match("^\s*$", line):
+            print("!!!! Skip " + line)
 
 
     print(nodes_name_dict)
