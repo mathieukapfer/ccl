@@ -47,29 +47,38 @@ def ccl_item(key):
     return sep0 + '\[' + sep0 + key + sep0 + "=" + sep0 + keywords_value[key] + sep0 + '\]'
 
 
-# def create_node()
-
 def ccl_item_parser(key, value, node_dict):
     """
-    return dict of node when complete
+    Complete node dictionary with current key and value.
+    Refine value if needed
+
+       Input:
+          - key & value : current couple of key, value
+          - node_dict : current node dictionnary under construction
+
+        Return node dictionary when complete
     """
     complete_node_dict = dict()
 
     # special keys
     if key == 'phase':
-        # check node complete, return it
+        # a node start with 'phase' key
+        # if current node dictionary is not null, then it is assumed to be complete
         if len(node_dict) > 0:
             print(node_dict)
             complete_node_dict = node_dict.copy()
         # start a new node
         node_dict.clear()
         node_dict[key] = value
+
     elif key == "definition_ID\(arg#\)":
-        # refine value
+        # refine value: extract id and position
         m = re.match(keywords_value[key], value)
         node_dict['id'] = m.group(2)
         node_dict['pos'] = m.group(3)
+
     elif key == "observation_ids\(arg#s\)":
+        # refine value: extract list of id and position
         pos = 0
         obs_ids = list(tuple())
         n = re.search(regexp_id, value[pos:])
@@ -100,7 +109,6 @@ def ccl_file_parser():
     node_dict = dict()
     complete_node_dict = dict()
     nodes_dict = dict()
-    #G = nx.DiGraph()
 
 
     # parse each item and build items dictionnary
@@ -121,7 +129,7 @@ def ccl_file_parser():
                 # print(exp)
                 m = re.match(exp, line[pos:])
                 if m:
-                    # upate loop parameters
+                    # update loop parameters
                     found = True
                     nb_keys_found += 1
                     print("===>" + key + ":" + m.group(1))
@@ -135,6 +143,9 @@ def ccl_file_parser():
                     # move pointer
                     pos += m.end()
 
+            # add last node
+            nodes_dict[node_dict.get('id','none')] = node_dict
+
         # 2) check rest of line
         if pos < len(line):
             if not re.match("[\b ,;\n]+$", line[pos:]):
@@ -143,9 +154,12 @@ def ccl_file_parser():
 
     # status
     if error is False:
-        print("\n\nNo error found, {} keywords found".format(nb_keys_found))
-        #print(nodes_dict)
+        print("\n\nNo error found:")
+        print(" {} keywords found".format(nb_keys_found))
         print(" {} nodes detected".format(len(nodes_dict)))
+        print(nodes_dict)
+
+    return nodes_dict
 
 
 ccl_file_parser()
