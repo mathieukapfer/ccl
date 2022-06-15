@@ -1,0 +1,69 @@
+Python 3.6.9 (default, Mar 15 2022, 13:55:28) 
+[GCC 8.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> python.el: native completion setup loaded
+>>> Check: All streams are defined
+Info: Longest Path:  2288500
+['start', 'blp_info_per_ue', 'descramble_soft_bits_per_ue', 'soft_bits_data_cblk_1', 'rate_dematch_1', 'dbit_1', 'tblk']
+>>> G= build_stream_graph()
+>>> my_dot = nx.nx_pydot.to_pydot(G)
+>>> my_dot.to_string()
+'strict digraph  {\nbuffer_ldpc [fct=buffer_ldpc_cfunc, size=183168];\nstart;\nbuffer_rate0 [fct=stub_rate0_cfunc, size=1456];\nbuffer_rate1 [fct=stub_rate1_cfunc, size=1456];\nsoft_bits_per_ue [fct=getSoftBitsData_cfunc, size=27600];\nblp_info_per_ue [fct=getUserBLPInfo_cfunc, size=256];\ndescramble_soft_bits_per_ue [fct=descrambler_cfunc, size=36668];\ndata_cblk_list [fct=extract_data_cblk_info_cfunc, size=256];\nsoft_bits_data_cblk_1 [fct=soft_bits_data_demux_cfunc, size=18334];\nsoft_bits_data_cblk_2 [fct=soft_bits_data_demux_cfunc, size=18334];\nrate_dematch_1 [fct=rate_dematch_cfunc, size=16848];\ndbit_1 [fct=ldpc_decoder_cfunc, size=16848];\nrate_dematch_2 [fct=rate_dematch_cfunc, size=16848];\ndbit_2 [fct=ldpc_decoder_cfunc, size=16848];\ntblk [fct=cbl_concat_tblkcrc_generate_cfunc, size=9999];\nbuffer_ldpc -> dbit_1  [weight=2000000];\nbuffer_ldpc -> dbit_2  [weight=2000000];\nstart -> buffer_ldpc  [weight=2000];\nstart -> buffer_rate0  [weight=2000];\nstart -> buffer_rate1  [weight=2000];\nstart -> soft_bits_per_ue  [weight=1280];\nstart -> blp_info_per_ue  [weight=1500];\nbuffer_rate0 -> rate_dematch_1  [weight=200000];\nbuffer_rate0 -> rate_dematch_2  [weight=200000];\nbuffer_rate1 -> rate_dematch_1  [weight=200000];\nbuffer_rate1 -> rate_dematch_2  [weight=200000];\nsoft_bits_per_ue -> descramble_soft_bits_per_ue  [weight=40000];\nblp_info_per_ue -> descramble_soft_bits_per_ue  [weight=40000];\nblp_info_per_ue -> data_cblk_list  [weight=2000];\ndescramble_soft_bits_per_ue -> soft_bits_data_cblk_1  [weight=7000];\ndescramble_soft_bits_per_ue -> soft_bits_data_cblk_2  [weight=7000];\ndata_cblk_list -> soft_bits_data_cblk_1  [weight=7000];\ndata_cblk_list -> soft_bits_data_cblk_2  [weight=7000];\ndata_cblk_list -> rate_dematch_1  [weight=200000];\ndata_cblk_list -> dbit_1  [weight=2000000];\ndata_cblk_list -> rate_dematch_2  [weight=200000];\ndata_cblk_list -> dbit_2  [weight=2000000];\ndata_cblk_list -> tblk  [weight=40000];\nsoft_bits_data_cblk_1 -> rate_dematch_1  [weight=200000];\nsoft_bits_data_cblk_2 -> rate_dematch_2  [weight=200000];\nrate_dematch_1 -> dbit_1  [weight=2000000];\ndbit_1 -> tblk  [weight=40000];\nrate_dematch_2 -> dbit_2  [weight=2000000];\ndbit_2 -> tblk  [weight=40000];\n}\n'
+>>> my_dot.write_dot("out.dot")
+>>> my_dot.write_raw("out_raw.dot")
+>>>
+
+
+# cat out_raw.dot
+
+strict digraph  {
+buffer_ldpc [fct=buffer_ldpc_cfunc, size=183168];
+start;
+buffer_rate0 [fct=stub_rate0_cfunc, size=1456];
+buffer_rate1 [fct=stub_rate1_cfunc, size=1456];
+soft_bits_per_ue [fct=getSoftBitsData_cfunc, size=27600];
+blp_info_per_ue [fct=getUserBLPInfo_cfunc, size=256];
+descramble_soft_bits_per_ue [fct=descrambler_cfunc, size=36668];
+data_cblk_list [fct=extract_data_cblk_info_cfunc, size=256];
+soft_bits_data_cblk_1 [fct=soft_bits_data_demux_cfunc, size=18334];
+soft_bits_data_cblk_2 [fct=soft_bits_data_demux_cfunc, size=18334];
+rate_dematch_1 [fct=rate_dematch_cfunc, size=16848];
+dbit_1 [fct=ldpc_decoder_cfunc, size=16848];
+rate_dematch_2 [fct=rate_dematch_cfunc, size=16848];
+dbit_2 [fct=ldpc_decoder_cfunc, size=16848];
+tblk [fct=cbl_concat_tblkcrc_generate_cfunc, size=9999];
+buffer_ldpc -> dbit_1  [weight=2000000];
+buffer_ldpc -> dbit_2  [weight=2000000];
+start -> buffer_ldpc  [weight=2000];
+start -> buffer_rate0  [weight=2000];
+start -> buffer_rate1  [weight=2000];
+start -> soft_bits_per_ue  [weight=1280];
+start -> blp_info_per_ue  [weight=1500];
+buffer_rate0 -> rate_dematch_1  [weight=200000];
+buffer_rate0 -> rate_dematch_2  [weight=200000];
+buffer_rate1 -> rate_dematch_1  [weight=200000];
+buffer_rate1 -> rate_dematch_2  [weight=200000];
+soft_bits_per_ue -> descramble_soft_bits_per_ue  [weight=40000];
+blp_info_per_ue -> descramble_soft_bits_per_ue  [weight=40000];
+blp_info_per_ue -> data_cblk_list  [weight=2000];
+descramble_soft_bits_per_ue -> soft_bits_data_cblk_1  [weight=7000];
+descramble_soft_bits_per_ue -> soft_bits_data_cblk_2  [weight=7000];
+data_cblk_list -> soft_bits_data_cblk_1  [weight=7000];
+data_cblk_list -> soft_bits_data_cblk_2  [weight=7000];
+data_cblk_list -> rate_dematch_1  [weight=200000];
+data_cblk_list -> dbit_1  [weight=2000000];
+data_cblk_list -> rate_dematch_2  [weight=200000];
+data_cblk_list -> dbit_2  [weight=2000000];
+data_cblk_list -> tblk  [weight=40000];
+soft_bits_data_cblk_1 -> rate_dematch_1  [weight=200000];
+soft_bits_data_cblk_2 -> rate_dematch_2  [weight=200000];
+rate_dematch_1 -> dbit_1  [weight=2000000];
+dbit_1 -> tblk  [weight=40000];
+rate_dematch_2 -> dbit_2  [weight=2000000];
+dbit_2 -> tblk  [weight=40000];
+}
+
+On term:
+
+# xdot out.dot
+# xdot out_raw.dot
