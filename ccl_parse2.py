@@ -1,4 +1,7 @@
 import re
+import networkx as nx
+
+# Syntaxe
 
 comment = "#.*$"
 
@@ -14,13 +17,15 @@ keywords = [
     "defining resource", "define memory offset", "observe memory offset",
     ]
 
+regexp_id = "(\d+)\((\d+)\)"  # 1(2)
+
 keywords_value = {
     "phase":                       "([\w ,]+)",
     "action":                      "([\w]+)",
     "elementsize":                 "([\d]+)",
     "runtime":                     "([\d]+)",
-    "definition_ID\(arg#\)":       "(\d+)\((\d+)\)",
-    "observation_ids\(arg#s\)":    "((\d+)\((\d+)\)[, ]*)+",  # list of "(\d+)\((\d+)\)",
+    "definition_ID\(arg#\)":       "(" + regexp_id + ")",
+    "observation_ids\(arg#s\)":    "((" + regexp_id + sep0 + ")+)",  # list of id
     "define":                      "([\d]+)",
     "end_define":                  "([\d]+)",
     "L2toL2":                      "([\d]+)",
@@ -34,16 +39,71 @@ keywords_value = {
 }
 
 
-def ccl_parser():
+# Grammar
+def ccl_item(key):
+    """
+    return the regexp for one key
+    """
+    return sep0 + '\[' + sep0 + key + sep0 + "=" + sep0 + keywords_value[key] + sep0 + '\]'
+
+
+# def create_node()
+
+def ccl_item_parser(key, value, node_dict):
+    """
+    return dict of node when complete
+    """
+    complete_node_dict = dict()
+
+    # special keys
+    if key == 'phase':
+        # check node complete, return it
+        if len(node_dict) > 0:
+            print(node_dict)
+            complete_node_dict = node_dict.copy()
+        # start a new node
+        node_dict.clear()
+        node_dict[key] = value
+    elif key == "definition_ID\(arg#\)":
+        # refine value
+        m = re.match(keywords_value[key], value)
+        node_dict['id'] = m.group(2)
+        node_dict['pos'] = m.group(3)
+    elif key == "observation_ids\(arg#s\)":
+        pos = 0
+        obs_ids = list(tuple())
+        n = re.search(regexp_id, value[pos:])
+        while n:
+            pos += n.end()
+            obs_ids.append((n.group(1), n.group(2)))
+            n = re.search(regexp_id, value[pos:])
+        node_dict['obs_ids'] = obs_ids
+    # other keys
+    else:
+        node_dict[key] = value
+
+    return complete_node_dict
+
+
+def ccl_file_parser():
     """
     Parse CCL file
     """
 
+    # read file
     file1 = open('CCL_file_2cblk.txt', 'r')
     lines = file1.readlines()
+
+    # prepare parsing
     error = False
     nb_keys_found = 0
+    node_dict = dict()
+    complete_node_dict = dict()
+    nodes_dict = dict()
+    #G = nx.DiGraph()
 
+
+    # parse each item and build items dictionnary
     for line in lines:
         pos = 0
         found = True
@@ -55,15 +115,24 @@ def ccl_parser():
 
         # 1) search keyword
         while found is True:
-            found = False
+            found = False  # simulate do .. while loop
             for key in keywords:
-                exp = sep0 + '\[' + sep0 + key + sep0 + "=" + sep0 + keywords_value[key] + sep0 + '\]'
+                exp = ccl_item(key)
                 # print(exp)
                 m = re.match(exp, line[pos:])
                 if m:
+                    # upate loop parameters
                     found = True
                     nb_keys_found += 1
-                    # print("===>" + key + ":" + m.group(1))
+                    print("===>" + key + ":" + m.group(1))
+
+                    # parse node and add it in nodes dict when complete
+                    complete_node_dict = ccl_item_parser(key, m.group(1), node_dict)
+                    if len(complete_node_dict) > 0:
+                        nodes_dict[complete_node_dict.get('id','none')] = complete_node_dict
+                        print(complete_node_dict)
+
+                    # move pointer
                     pos += m.end()
 
         # 2) check rest of line
@@ -72,8 +141,11 @@ def ccl_parser():
                 error = True
                 print("Skip: " + line[pos:])
 
+    # status
     if error is False:
-        print("No error found, {} keywords found".format(nb_keys_found))
+        print("\n\nNo error found, {} keywords found".format(nb_keys_found))
+        #print(nodes_dict)
+        print(" {} nodes detected".format(len(nodes_dict)))
 
 
-ccl_parser()
+ccl_file_parser()
