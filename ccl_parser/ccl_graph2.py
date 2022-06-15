@@ -1,12 +1,15 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from ccl_parse2 import ccl_file_parser
+from ccl_parser.ccl_parse2 import ccl_file_parser
+from ccl_graph.ccl_graph_viewer import draw_graph
 
 
 def format_node_name(node):
     """
-    return long name of given node as sting
+    Format node name
+       input: node dictionary
+       return string of long name of the given node
     """
     return "{}\n ({})\n phase{}".format(
         #\n size:{} \n runtime:{}
@@ -20,6 +23,12 @@ def format_node_name(node):
 
 def build_stream_graph(nodes_dict):
     """
+    Build graph from nodes dictionary
+       input: dictionary of nodes where
+               - obs_id : is the observed id
+               - id: is the node_id
+               => edge is create to mark the dependencies from one id to its observed id
+       return networkx graph
     """
     G = nx.DiGraph()
 
@@ -35,20 +44,39 @@ def build_stream_graph(nodes_dict):
         G.add_node(node_id)
 
         # Create edge
-        for obs_id in node.get('obs_ids',[]):
-            G.add_edge(obs_id[0], node_id)
+        for obs_id in node.get('obs_ids', []):
+            # G.add_edge(obs_id[0], node_id)
+            G.add_edges_from([(obs_id[0], node_id, {
+                'weight': int(node['runtime'])
+            }
+            ), ])
+
 
     print("\n {}".format(nodes_name_dict))
-    nx.relabel_nodes(G, nodes_name_dict, copy=False)
 
-    return G
+    return (G, nodes_name_dict)
 
 
 def display_graph(G):
     """
+    Create dot file that can be dispplay with xdot
     """
     ccl_dot = nx.nx_pydot.to_pydot(G)
     ccl_dot.write_raw("out_ccl_raw.dot")
 
 
-display_graph(build_stream_graph(ccl_file_parser()))
+#if __name__ == '__main__':
+def main():
+    # build graph from ccl file
+    (G, nodes_name_dict) = build_stream_graph(ccl_file_parser())
+
+    # draw with matplotlib
+    draw_graph(G, critical_path='no')
+    plt.show(block=False)
+
+    # save graph in dot format
+    nx.relabel_nodes(G, nodes_name_dict, copy=False)
+    display_graph(G)
+
+
+main()

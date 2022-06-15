@@ -162,4 +162,7 @@ def ccl_file_parser():
     return nodes_dict
 
 
-ccl_file_parser()
+#if __name__ == "__main__":
+def main():
+    d = ccl_file_parser()
+    print(d)
