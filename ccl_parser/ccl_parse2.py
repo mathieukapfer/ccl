@@ -65,7 +65,7 @@ def ccl_item_parser(key, value, node_dict):
         # a node start with 'phase' key
         # if current node dictionary is not null, then it is assumed to be complete
         if len(node_dict) > 0:
-            print(node_dict)
+            # print(node_dict)
             complete_node_dict = node_dict.copy()
         # start a new node
         node_dict.clear()
@@ -134,23 +134,25 @@ def ccl_file_parser(filename):
                     nb_keys_found += 1
                     print("===>" + key + ":" + m.group(1))
 
-                    # parse node and add it in nodes dict when complete
+                    # parse node
                     complete_node_dict = ccl_item_parser(key, m.group(1), node_dict)
+                    # add it in nodes dict when complete
                     if len(complete_node_dict) > 0:
-                        nodes_dict[complete_node_dict.get('id','none')] = complete_node_dict
+                        nodes_dict[complete_node_dict.get('id', 'none')] = complete_node_dict
                         print(complete_node_dict)
 
                     # move pointer
                     pos += m.end()
-
-            # add last node
-            nodes_dict[node_dict.get('id','none')] = node_dict
 
         # 2) check rest of line
         if pos < len(line):
             if not re.match("[\b ,;\n]+$", line[pos:]):
                 error = True
                 print("Skip: " + line[pos:])
+
+    # add last remaining node (assumed to be complete)
+    nodes_dict[node_dict.get('id', 'none')] = node_dict
+    print(node_dict)
 
     # status
     if error is False:
