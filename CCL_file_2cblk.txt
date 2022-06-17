@@ -223,55 +223,6 @@
 # resources used
 [defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 110566];
 
-# flow.top_level_test.stream.blpinfo_perUEGrp.1==>flow.top_level_test.s2.flow.pusch_bit_level_processing_per_ue.s3.flow.ulsch_decode_per_cblk.stream.t_rate_dematch_soft_bits_cblk.1.1
-# big_delay.DDR.L2.pe0_0.cl0
-# stream parameters
-[phase = 0, 1],
-[action = getUserBLPInfo_cfunc], [elementsize = 256],[runtime = 1500], [definition_ID(arg#) = 37(1)],
-#timing parameters
-[define = 0], [end_define = 1], [L2toDDR = 287], [DDRtoL2 = 15], [observe_start = 17], [observe_end = 507],
-# resources used
-[defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 35694];
-
-# flow.top_level_test.stream.blpinfo_perUEGrp.1==>flow.top_level_test.s2.flow.pusch_bit_level_processing_per_ue.stream.decoded_bits_cblk.1.1
-# big_delay.DDR.L2.pe0_0.cl1
-# stream parameters
-[phase = 0, 1],
-[action = getUserBLPInfo_cfunc], [elementsize = 256],[runtime = 1500], [definition_ID(arg#) = 38(1)],
-#timing parameters
-[define = 0], [end_define = 1], [L2toDDR = 14], [DDRtoL2 = 245], [observe_start = 247], [observe_end = 491],
-# resources used
-[defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 16848];
-
-# flow.top_level_test.stream.blpinfo_perUEGrp.1==>flow.top_level_test.s2.flow.pusch_bit_level_processing_per_ue.s3.flow.ulsch_decode_per_cblk.stream.t_rate_dematch_soft_bits_cblk.1.2
-# big_delay.DDR.L2.pe0_0.cl0
-# stream parameters
-[phase = 0],
-[action = getUserBLPInfo_cfunc], [elementsize = 256],[runtime = 1500], [definition_ID(arg#) = 39(1)],
-#timing parameters
-[define = 0], [end_define = 1], [L2toDDR = 10], [DDRtoL2 = 12], [observe_start = 14], [observe_end = 491],
-# resources used
-[defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 35950];
-
-# flow.top_level_test.stream.blpinfo_perUEGrp.1==>flow.top_level_test.s2.flow.pusch_bit_level_processing_per_ue.stream.decoded_bits_cblk.1.2
-# big_delay.DDR.L2.pe0_0.cl1
-# stream parameters
-[phase = 0, 1],
-[action = getUserBLPInfo_cfunc], [elementsize = 256],[runtime = 1500], [definition_ID(arg#) = 40(1)],
-#timing parameters
-[define = 0], [end_define = 1], [L2toDDR = 67], [DDRtoL2 = 2], [observe_start = 4], [observe_end = 248],
-# resources used
-[defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 17104];
-
-# flow.top_level_test.stream.blpinfo_perUEGrp.1==>flow.top_level_test.s2.flow.pusch_bit_level_processing_per_ue.s4.flow.cblk_concat_generateTblk.stream.data_tblk_info.1
-# big_delay.DDR.L2.pe0_0.cl0
-# stream parameters
-[phase = 0, 1],
-[action = getUserBLPInfo_cfunc], [elementsize = 256],[runtime = 1500], [definition_ID(arg#) = 41(1)],
-#timing parameters
-[define = 0], [end_define = 1], [L2toDDR = 497], [DDRtoL2 = 2], [observe_start = 4], [observe_end = 248],
-# resources used
-[defining resource = pe0_0], [define memory offset = 91720], [observe memory offset = 111334];
 
 # stub ldpc working memory
 # pipeline.L2.pe0_0.cl0

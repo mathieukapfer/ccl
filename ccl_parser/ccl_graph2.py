@@ -28,7 +28,7 @@ def build_stream_graph(nodes_dict):
                - obs_id : is the observed id
                - id: is the node_id
                => edge is create to mark the dependencies from one id to its observed id
-       return networkx graph
+       return tuple (networkx graph, dictionary of nodes name)
     """
     G = nx.DiGraph()
 
@@ -37,27 +37,28 @@ def build_stream_graph(nodes_dict):
     for node_id in nodes_dict:
         node = nodes_dict[node_id]
 
-        # Append node name dict
-        nodes_name_dict[node_id] = format_node_name(node)
-
         # Create node
-        G.add_node(node_id)
+        #G.add_node(node_id)
+        G.add_nodes_from([(node_id, {
+            'label': format_node_name(node),
+        }
+        ), ])
 
         # Create edge
         for obs_id in node.get('obs_ids', []):
             # G.add_edge(obs_id[0], node_id)
             G.add_edges_from([(obs_id[0], node_id, {
-                'weight': int(node['runtime'])
+                'weight': int(node['runtime']),
+                # 'phase': node['phase'],
             }
             ), ])
-
 
     print("\n {}".format(nodes_name_dict))
 
     return (G, nodes_name_dict)
 
 
-def display_graph(G):
+def write_dot_graph(G):
     """
     Create dot file that can be dispplay with xdot
     """
@@ -68,15 +69,24 @@ def display_graph(G):
 #if __name__ == '__main__':
 def main():
     # build graph from ccl file
-    (G, nodes_name_dict) = build_stream_graph(ccl_file_parser())
+    filename = 'CCL_file_2cblk.txt'
+    #filename = 'ccl_file_12May22.txt'
+
+    (G, nodes_name_dict) = build_stream_graph(ccl_file_parser(filename))
+
+    # color critical path
+    critical_path = nx.dag_longest_path(G, weight='weight')
+    for node in critical_path:
+        G.nodes[node]['color'] = 'red'
 
     # draw with matplotlib
     draw_graph(G, critical_path='no')
     plt.show(block=False)
 
     # save graph in dot format
-    nx.relabel_nodes(G, nodes_name_dict, copy=False)
-    display_graph(G)
+    # nx.relabel_nodes(G, nodes_name_dict, copy=False)
+
+    write_dot_graph(G)
 
 
 main()

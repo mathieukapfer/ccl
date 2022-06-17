@@ -1,5 +1,4 @@
 import re
-import networkx as nx
 
 # Syntaxe
 
@@ -25,7 +24,7 @@ keywords_value = {
     "elementsize":                 "([\d]+)",
     "runtime":                     "([\d]+)",
     "definition_ID\(arg#\)":       "(" + regexp_id + ")",
-    "observation_ids\(arg#s\)":    "((" + regexp_id + sep0 + ")+)",  # list of id
+    "observation_ids\(arg#s\)":    "((" + regexp_id + sep0 + ")+)",
     "define":                      "([\d]+)",
     "end_define":                  "([\d]+)",
     "L2toL2":                      "([\d]+)",
@@ -34,12 +33,13 @@ keywords_value = {
     "observe_start":               "([\d]+)",
     "observe_end":                 "([\d]+)",
     "defining resource":           "([\w]+)",
-    "define memory offset":        "([-\d]+)",  # maybe negative
+    "define memory offset":        "([-\d]+)",  # maybe negative !
     "observe memory offset":       "([\d]+)",
 }
 
 
 # Grammar
+
 def ccl_item(key):
     """
     return the regexp for one key
@@ -94,13 +94,13 @@ def ccl_item_parser(key, value, node_dict):
     return complete_node_dict
 
 
-def ccl_file_parser():
+def ccl_file_parser(filename):
     """
     Parse CCL file
     """
 
     # read file
-    file1 = open('CCL_file_2cblk.txt', 'r')
+    file1 = open(filename, 'r')
     lines = file1.readlines()
 
     # prepare parsing
@@ -164,5 +164,8 @@ def ccl_file_parser():
 
 #if __name__ == "__main__":
 def main():
-    d = ccl_file_parser()
+    # d = ccl_file_parser('CCL_file_2cblk.txt')
+    d = ccl_file_parser('ccl_file_12May22.txt')
     print(d)
+
+# main()
