@@ -17,12 +17,16 @@ def main(filename):
        - matplotlib window with networkx graph representation
 
     """
-    (G, nodes_name_dict) = build_stream_graph(ccl_file_parser(filename))
+    G = build_stream_graph(ccl_file_parser(filename))
 
     # color critical path
+    # - nodes
     critical_path = nx.dag_longest_path(G, weight='weight')
     for node in critical_path:
         G.nodes[node]['color'] = 'red'
+    # - edges
+    for index in range(0, len(critical_path)-1):
+        G.edges[critical_path[index], critical_path[index + 1]]['color'] = 'red'
 
     # draw with matplotlib
     draw_graph(G, critical_path='no')

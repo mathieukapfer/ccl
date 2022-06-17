@@ -28,7 +28,7 @@ def build_stream_graph(nodes_dict):
                - obs_id : is the observed id
                - id: is the node_id
                => edge is create to mark the dependencies from one id to its observed id
-       return tuple (networkx graph, dictionary of nodes name)
+       return tuple graph in networkx
     """
     G = nx.DiGraph()
 
@@ -49,13 +49,14 @@ def build_stream_graph(nodes_dict):
             # G.add_edge(obs_id[0], node_id)
             G.add_edges_from([(obs_id[0], node_id, {
                 'weight': int(node['runtime']),
+                'label': "(" + obs_id[1] + ")",
                 # 'phase': node['phase'],
             }
             ), ])
 
     print("\n {}".format(nodes_name_dict))
 
-    return (G, nodes_name_dict)
+    return G
 
 
 def write_dot_graph(G):
@@ -72,12 +73,17 @@ def main():
     filename = 'CCL_file_2cblk.txt'
     #filename = 'ccl_file_12May22.txt'
 
-    (G, nodes_name_dict) = build_stream_graph(ccl_file_parser(filename))
+    G = build_stream_graph(ccl_file_parser(filename))
 
     # color critical path
+    # - nodes
     critical_path = nx.dag_longest_path(G, weight='weight')
     for node in critical_path:
         G.nodes[node]['color'] = 'red'
+    # - edges
+    for index in range(0, len(critical_path)-1):
+        G.edges[critical_path[index], critical_path[index + 1]]['color'] = 'red'
+
 
     # draw with matplotlib
     draw_graph(G, critical_path='no')
@@ -87,6 +93,6 @@ def main():
     # nx.relabel_nodes(G, nodes_name_dict, copy=False)
 
     write_dot_graph(G)
-
+    return G
 
 main()
