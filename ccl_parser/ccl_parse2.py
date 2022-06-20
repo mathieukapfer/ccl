@@ -8,6 +8,8 @@ sep = "[\s,]+"
 
 sep0 = "[\s,]*"
 
+endofstream = "[\s;]+"
+
 keywords = [
     "phase",
     "action", "elementsize", "runtime", "definition_ID\(arg#\)",
@@ -56,19 +58,11 @@ def ccl_item_parser(key, value, node_dict):
           - key & value : current couple of key, value
           - node_dict : current node dictionnary under construction
 
-        Return node dictionary when complete
     """
-    complete_node_dict = dict()
 
     # special keys
     if key == 'phase':
-        # a node start with 'phase' key
-        # if current node dictionary is not null, then it is assumed to be complete
-        if len(node_dict) > 0:
-            # print(node_dict)
-            complete_node_dict = node_dict.copy()
-        # start a new node
-        node_dict.clear()
+        # phase (todo : extract list of phases)
         node_dict[key] = value
 
     elif key == "definition_ID\(arg#\)":
@@ -91,8 +85,6 @@ def ccl_item_parser(key, value, node_dict):
     else:
         node_dict[key] = value
 
-    return complete_node_dict
-
 
 def ccl_file_parser(filename):
     """
@@ -107,7 +99,6 @@ def ccl_file_parser(filename):
     error = False
     nb_keys_found = 0
     node_dict = dict()
-    complete_node_dict = dict()
     nodes_dict = dict()
 
 
@@ -135,24 +126,25 @@ def ccl_file_parser(filename):
                     print("===>" + key + ":" + m.group(1))
 
                     # parse node
-                    complete_node_dict = ccl_item_parser(key, m.group(1), node_dict)
-                    # add it in nodes dict when complete
-                    if len(complete_node_dict) > 0:
-                        nodes_dict[complete_node_dict.get('id', 'none')] = complete_node_dict
-                        print(complete_node_dict)
+                    ccl_item_parser(key, m.group(1), node_dict)
 
                     # move pointer
                     pos += m.end()
 
         # 2) check rest of line
         if pos < len(line):
-            if not re.match("[\b ,;\n]+$", line[pos:]):
+            # end of stream : ';'
+            m = re.match(endofstream, line[pos:])
+            if len(node_dict) > 0 and m:
+                pos += m.end()
+                nodes_dict[node_dict.get('id', 'none')] = node_dict.copy()
+                print(node_dict)
+                node_dict.clear()
+            # still something ?
+            elif not re.match("[\b ,\n]+$", line[pos:]):
                 error = True
                 print("Skip: " + line[pos:])
 
-    # add last remaining node (assumed to be complete)
-    nodes_dict[node_dict.get('id', 'none')] = node_dict
-    print(node_dict)
 
     # status
     if error is False:
