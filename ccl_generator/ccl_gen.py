@@ -1,8 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from ccl_graph import build_stream_graph, draw_graph
-from ccl_def import functions_execution_model
+from ccl_graph.ccl_graph_viewer import draw_graph
+from ccl_generator.ccl_graph import build_stream_graph
+from ccl_generator.ccl_def import functions_execution_model
 
 def gen_execution_model_from_node(node_name, G, consumed_node, level, exec_G):
     """ process one node """

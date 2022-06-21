@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-from ccl_check import check_streams_defined
-from ccl_def import functions_run_time, functions_args, streams
+from ccl_generator.ccl_check import check_streams_defined
+from ccl_generator.ccl_def import functions_run_time, functions_args, streams
 from ccl_graph.ccl_graph_viewer import draw_graph
+
 
 def build_fct_graph():
     """ Build DAG with function as node """
@@ -43,8 +44,8 @@ def build_stream_graph(display=False):
             for param_out in [param for (in_out, param) in params if in_out == 'out']:
                 # create 'stream' node with producer and size
                 G.add_nodes_from([ (param_out, {
-                    'size': streams[param_out],  # G.nodes[param_out]['size'] = streams[param_out]
-                    'fct': fct,                  # G.nodes[param_out]['fct'] = fct
+                    'size': streams.get(param_out, "unknown"),  # G.nodes[param_out]['size'] = streams[param_out]
+                    'label': fct,                  # G.nodes[param_out]['fct'] = fct
                 }
                 ), ])
 
@@ -87,5 +88,5 @@ def write_dot(G):
 
 
 
-#write_dot(build_stream_graph(display=True))
+write_dot(build_stream_graph(display=True))
 #draw_my_graph()

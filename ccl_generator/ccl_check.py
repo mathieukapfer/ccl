@@ -1,4 +1,4 @@
-from ccl_def import functions_args
+from ccl_generator.ccl_def import functions_args
 
 
 # Check all 'in' streams are defined i.e. exist as 'out' streams somewhere

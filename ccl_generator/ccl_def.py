@@ -66,7 +66,7 @@ functions_args = [
     # concat blocks
     ("extract_data_tblk_info_cfunc", [("in", "data_cblk_list"), ("out", "data_tblk_info")]),
     ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit_1"), ("in", "dbit_2"), ("in", "data_tblk_info"), ("out", "tblk")]),
-    ("putUserTBLKData_cfunc",        [("in", "tblk")]),
+    ("putUserTBLKData_cfunc",        [("in", "tblk"), ("out", "none")]),
     ]
 
 
