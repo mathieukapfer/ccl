@@ -1,8 +1,4 @@
-import matplotlib.pyplot as plt
 import networkx as nx
-
-from ccl_parser.ccl_parse2 import ccl_file_parser
-from ccl_graph.ccl_graph_viewer import draw_graph
 
 
 def format_node_name(node):
@@ -28,7 +24,7 @@ def build_stream_graph(nodes_dict):
                - obs_id : is the observed id
                - id: is the node_id
                => edge is create to mark the dependencies from one id to its observed id
-       return tuple graph in networkx
+       return graph in networkx
     """
     G = nx.DiGraph()
 
@@ -61,38 +57,8 @@ def build_stream_graph(nodes_dict):
 
 def write_dot_graph(G):
     """
-    Create dot file that can be dispplay with xdot
+    Create dot file that can be display with xdot
+       input: graph in networkx format
     """
     ccl_dot = nx.nx_pydot.to_pydot(G)
     ccl_dot.write_raw("out_ccl_raw.dot")
-
-
-#if __name__ == '__main__':
-def main():
-    # build graph from ccl file
-    filename = 'CCL_file_2cblk.txt'
-    #filename = 'ccl_file_12May22.txt'
-
-    G = build_stream_graph(ccl_file_parser(filename))
-
-    # color critical path
-    # - nodes
-    critical_path = nx.dag_longest_path(G, weight='weight')
-    for node in critical_path:
-        G.nodes[node]['color'] = 'red'
-    # - edges
-    for index in range(0, len(critical_path)-1):
-        G.edges[critical_path[index], critical_path[index + 1]]['color'] = 'red'
-
-
-    # draw with matplotlib
-    draw_graph(G, critical_path='no')
-    plt.show(block=False)
-
-    # save graph in dot format
-    # nx.relabel_nodes(G, nodes_name_dict, copy=False)
-
-    write_dot_graph(G)
-    return G
-
-main()

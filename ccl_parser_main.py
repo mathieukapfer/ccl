@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import networkx as nx
 
 from ccl_parser.ccl_graph2 import build_stream_graph, write_dot_graph
 from ccl_parser.ccl_parse2 import ccl_file_parser
@@ -8,7 +7,7 @@ from ccl_graph.ccl_graph_viewer import draw_graph
 
 
 # build graph from ccl file
-def main(filename):
+def ccl_to_graph(filename):
     """
     Build graph from ccl file.
 
@@ -17,28 +16,22 @@ def main(filename):
        - matplotlib window with networkx graph representation
 
     """
-    G = build_stream_graph(ccl_file_parser(filename))
 
-    # color critical path
-    # - nodes
-    critical_path = nx.dag_longest_path(G, weight='weight')
-    for node in critical_path:
-        G.nodes[node]['color'] = 'red'
-    # - edges
-    for index in range(0, len(critical_path)-1):
-        G.edges[critical_path[index], critical_path[index + 1]]['color'] = 'red'
+    # parse ccl file: produce nodes dictionnary
+    nodes = ccl_file_parser(filename)
 
-    # draw with matplotlib
-    draw_graph(G, critical_path='no')
+    # build networkx graphw from nodes dictionnary
+    G = build_stream_graph(nodes)
+
+    # draw networkx graph with matplotlib
+    draw_graph(G, critical_path='yes')
     plt.show(block=False)
 
-    # save graph in dot format
-    # nx.relabel_nodes(G, nodes_name_dict, copy=False)
-
+    # write dot file
     write_dot_graph(G)
 
 
 filename = 'CCL_file_2cblk.txt'
 # filename = 'ccl_file_12May22.txt'
 
-main(filename)
+ccl_to_graph(filename)

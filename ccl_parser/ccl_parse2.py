@@ -88,7 +88,7 @@ def ccl_item_parser(key, value, node_dict):
 
 def ccl_file_parser(filename):
     """
-    Parse CCL file
+    Parse CCL file and return dictionnary of streams
     """
 
     # read file
