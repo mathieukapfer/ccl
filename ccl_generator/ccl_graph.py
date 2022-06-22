@@ -4,7 +4,7 @@ import networkx as nx
 
 from ccl_generator.ccl_check import check_streams_defined
 from ccl_generator.ccl_def import functions_run_time, functions_args, streams
-from ccl_graph.ccl_graph_viewer import draw_graph
+from ccl_graph.ccl_graph_viewer import draw_graph, colorize_path
 
 
 def build_fct_graph():
@@ -88,6 +88,10 @@ def write_dot(G):
        input: G: graph in networkx fomat to be converted
 
     """
+
+    critical_path = nx.dag_longest_path(G, weight='weight')
+    colorize_path(G, critical_path, 'red')
+
     my_dot = nx.nx_pydot.to_pydot(G)
     my_dot.write_raw("out_raw.dot")
 
