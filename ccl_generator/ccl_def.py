@@ -16,6 +16,7 @@ functions_run_time = {
     "buffer_ldpc_cfunc": 2000,
     "stub_rate0_cfunc": 2000,
     "stub_rate1_cfunc": 2000,
+    "stub_tblk_cfunc": 2000,
 }
 
 # - streams definition
@@ -24,6 +25,7 @@ streams = {
     "buffer_ldpc": 183168,
     "buffer_rate0": 1456,
     "buffer_rate1": 1456,
+    "buffer_tblk": 1456,
     # streams
     "soft_bits_per_ue": 27600,
     "blp_info_per_ue": 256,
@@ -48,24 +50,26 @@ functions_args = [
     ("buffer_ldpc_cfunc",            [("out", "buffer_ldpc")]),
     ("stub_rate0_cfunc",             [("out", "buffer_rate0")]),
     ("stub_rate1_cfunc",             [("out", "buffer_rate1")]),
+    ("stub_tblk_cfunc",              [("out", "buffer_tblk")]),
 
     # steams compute
     ("getSoftBitsData_cfunc",        [("out", "soft_bits_per_ue")]),
     ("getUserBLPInfo_cfunc",         [("out", "blp_info_per_ue")]),
-    ("descrambler_cfunc",            [("in", "soft_bits_per_ue"), ("in", "blp_info_per_ue"), ("out", "descramble_soft_bits_per_ue")]),
     ("extract_data_cblk_info_cfunc", [("in", "blp_info_per_ue"), ("out", "data_cblk_list")]),
-    ("soft_bits_data_demux_cfunc",   [("in", "descramble_soft_bits_per_ue"), ("in", "data_cblk_list"), ("out", "soft_bits_data_cblk_1"), ("out", "soft_bits_data_cblk_2")]),
+    ("descrambler_cfunc",            [("in", "soft_bits_per_ue"), ("in", "blp_info_per_ue"), ("out", "descramble_soft_bits_per_ue")]),
 
     # block 1
-    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk_1"), ("in", "data_cblk_list"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("out", "rate_dematch_1")]),
-    ("ldpc_decoder_cfunc",           [("in", "data_cblk_list"), ("in", "rate_dematch_1"), ("in", "buffer_ldpc"), ("out", "dbit_1")]),
+    ("soft_bits_data_demux_cfunc",   [("in", "descramble_soft_bits_per_ue"), ("in", "data_cblk_list"), ("out", "soft_bits_data_cblk_1"), ("out", "soft_bits_data_cblk_1")]),
+    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk_1"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("in", "data_cblk_list"), ("out", "rate_dematch_1")]),
+    ("ldpc_decoder_cfunc",           [("in", "rate_dematch_1"), ("in", "buffer_ldpc"), ("in", "data_cblk_list"), ("out", "dbit_1")]),
     # bloc 2
-    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk_2"), ("in", "data_cblk_list"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("out", "rate_dematch_2")]),
-    ("ldpc_decoder_cfunc",           [("in", "data_cblk_list"), ("in", "rate_dematch_2"), ("in", "buffer_ldpc"), ("out", "dbit_2")]),
+    ("soft_bits_data_demux_cfunc",   [("in", "descramble_soft_bits_per_ue"), ("in", "data_cblk_list"), ("out", "soft_bits_data_cblk_1"), ("out", "soft_bits_data_cblk_2")]),
+    ("rate_dematch_cfunc",           [("in", "soft_bits_data_cblk_2"), ("in", "buffer_rate0"), ("in", "buffer_rate1"), ("in", "data_cblk_list"), ("out", "rate_dematch_2")]),
+    ("ldpc_decoder_cfunc",           [("in", "rate_dematch_2"), ("in", "buffer_ldpc"), ("in", "data_cblk_list"), ("out", "dbit_2")]),
 
     # concat blocks
     ("extract_data_tblk_info_cfunc", [("in", "data_cblk_list"), ("out", "data_tblk_info")]),
-    ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit_1"), ("in", "dbit_2"), ("in", "data_tblk_info"), ("out", "tblk")]),
+    ("cbl_concat_tblkcrc_generate_cfunc", [("in", "dbit_1"), ("in", "dbit_2"), ("in", "buffer_tblk"), ("in", "data_tblk_info"), ("out", "tblk")]),
     ("putUserTBLKData_cfunc",        [("in", "tblk"), ("out", "none")]),
     ]
 
@@ -78,10 +82,32 @@ functions_execution_model = {
     'getSoftBitsData_cfunc':                {},
     'getUserBLPInfo_cfunc':                 {},
     'descrambler_cfunc':                    {},
-    'extract_data_cblk_info_cfunc':         {'table': 2},  # generate two streams
-    'soft_bits_data_demux_cfunc':           {'table': 2},  # generate two streams
-    'rate_dematch_cfunc':                   {'table': 2, 'phase': [0, 1]},
-    'ldpc_decoder_cfunc':                   {'table': 2, 'phase': [1]},
+    'extract_data_cblk_info_cfunc':         {},
+    'soft_bits_data_demux_cfunc':           {},
+    'rate_dematch_cfunc':                   {},
+    'ldpc_decoder_cfunc':                   {'affinity': 'sPE', 'phase': [1]},
     'cbl_concat_tblkcrc_generate_cfunc':    {'phase': [1]},
     'putUserTBLKData_cfunc':                {'phase': [1]},
+}
+
+streams_phase = {
+    # bufs
+    "buffer_ldpc": 1,
+    "buffer_rate0": 0,
+    "buffer_rate1": 0,
+    # streams
+    "soft_bits_per_ue": 0,
+    "blp_info_per_ue": 0,
+    "descramble_soft_bits_per_ue": 0,
+    "data_cblk_list": 0,
+    "soft_bits_data_cblk_1": 0,
+    "soft_bits_data_cblk_2": 0,
+    "data_cblk_list": 0,
+    "rate_dematch_1": 0.5,  # define in phase 0, observed in phase 1
+    "rate_dematch_2": 1,
+    "dbit_1": 1,
+    "dbit_2": 1,
+    "data_tblk_info": 1,
+    "tblk": 1,
+    "end": 1,
 }
