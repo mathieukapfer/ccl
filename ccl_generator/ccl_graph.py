@@ -35,23 +35,28 @@ def build_stream_graph(display=False):
     # for each function, link output parameter and input parameters
     for (fct, params) in functions_args:
         param_in_list = [param for (in_out, param) in params if in_out == 'in']
+        param_pos = 0
 
         if len(param_in_list) == 0:
             # no input parameter => add node 'start'
             param_in_list = ['start']
 
         for param_in in param_in_list:
+            param_pos += 1
             for param_out in [param for (in_out, param) in params if in_out == 'out']:
                 # create 'stream' node with producer and size
-                G.add_nodes_from([ (param_out, {
-                    'size': streams.get(param_out, "unknown"),  # G.nodes[param_out]['size'] = streams[param_out]
-                    'label': fct,                  # G.nodes[param_out]['fct'] = fct
+                G.add_nodes_from([(param_out, {
+                    # G.nodes[param_out]['size'] = streams[param_out]
+                    # G.nodes[param_out]['fct'] = fct
+                    'size': streams.get(param_out, "unknown"),
+                    'label': fct + "\n(" + param_out + ")",
                 }
                 ), ])
 
                 # create edges with producer run time
-                G.add_edges_from([ (param_in, param_out, {
-                    'weight': functions_run_time[fct]
+                G.add_edges_from([(param_in, param_out, {
+                    'weight': functions_run_time[fct],
+                    'label': "({})".format(param_pos),
                 }
                 ), ])
 
