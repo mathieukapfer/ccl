@@ -1,0 +1,48 @@
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 9(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 0], [end_define = 100], [observe_start = 200], [observe_end = 400],
+# resources used
+[defining resource = pe2_0], [define memory offset = 100000];
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 10(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 0], [end_define = 100], [observe_start = 200], [observe_end = 400],
+# resources used
+[defining resource = pe2_0], [define memory offset = 200000];
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 11(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 0], [end_define = 100], [observe_start = 200], [observe_end = 400],
+# resources used
+[defining resource = pe2_0], [define memory offset = 400000];
+
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 12(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 400], [end_define = 500], [observe_start = 600], [observe_end = 700],
+# resources used
+[defining resource = pe2_0], [define memory offset = 150000];
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 13(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 400], [end_define = 500], [observe_start = 600], [observe_end = 700],
+# resources used
+[defining resource = pe2_0], [define memory offset = 250000];
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 14(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 400], [end_define = 500], [observe_start = 600], [observe_end = 700],
+# resources used
+[defining resource = pe2_0], [define memory offset = 450000];
