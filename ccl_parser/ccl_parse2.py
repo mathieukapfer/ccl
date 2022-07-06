@@ -11,6 +11,7 @@ sep0 = "[\s,]*"
 endofstream = "[\s;]+"
 
 keywords = [
+    "CCLtype",
     "phase",
     "action", "elementsize", "runtime", "definition_ID\(arg#\)",
     "observation_ids\(arg#s\)",
@@ -21,6 +22,7 @@ keywords = [
 regexp_id = "(\d+)\((\d+)\)"  # 1(2)
 
 keywords_value = {
+    "CCLtype":                     "([\w]+)",
     "phase":                       "([\w ,]+)",
     "action":                      "([\w]+)",
     "elementsize":                 "([\d]+)",

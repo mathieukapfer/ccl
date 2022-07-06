@@ -6,6 +6,22 @@ from matplotlib.patches import Rectangle
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
 
+def draw_rectangle(ax, color, x1, y1, x2, y2):
+    """
+    Draw plot and rectangle as patch
+    """
+    ax.scatter(
+        (x1, x2), (y1, y2), c=color, marker=',', s=0.1)
+    ax.add_patch(
+        Rectangle((x1, y1),
+                  x2-x1, y2-y1,
+                  fc=color,
+                  ec=color,
+                  #lw=10
+                  ))
+    print("({},{}) ({},{})".format(x1, y1, x2, y2))
+
+
 def get_cluster(ressource_string):
     """
     Return last digit of 'define resource' known as cluster
@@ -55,16 +71,19 @@ def draw_svg(nodes):
         x2 = int(node.get('end_define', 0))
         y2 = y1 + int(node.get('elementsize', 0))
 
-        print("cluster:{} ({},{}) ({},{})".format(cluster_define, x1, y1, x2, y2))
-        ax_cluster[cluster_define].scatter(
-            (x1, x2), (y1, y2), c=color_define, marker=',', s=0.1)
-        ax_cluster[cluster_define].add_patch(Rectangle((x1, y1),
-                               x2-x1, y2-y1,
-                               fc=color_define,
-                               ec=color_define,
-                               #lw=10
-        ))
+        print("Define: cluster:{}".format(cluster_define))
+        draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
         plt.show(block=False)
+
+        # draw shadow region
+        # - move to DDR:           end_define -> L2toDDR,
+        # - move to other cluster: end_define -> L2toL2,
+        # - same cluster:          end_define -> observe_start
+        x1 = x2
+        x2 = int(node.get('L2toL2', node.get('L2toDDR', node.get('observe_start'))))
+        print("Shadow: cluster:{}".format(cluster_define))
+        draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
+
 
         # identify observer's cluster
         cluster_observes = list()
@@ -86,19 +105,25 @@ def draw_svg(nodes):
 
             # observed bloc
             x1 = int(node.get('observe_start', 0))
-            y1 = int(node.get('observe memory offset', node.get('define memory offset', 0)))
+            y1 = int(node.get('observe memory offset', node.get('define memory offset', -1)))
             x2 = int(node.get('observe_end', 0))
             y2 = y1 + int(node.get('elementsize', 0))
 
-            print("cluster:{} ({},{}) ({},{})".format(cluster_observe, x1, y1, x2, y2))
-            ax_cluster[cluster_observe].scatter(
-                (x1, x2), (y1, y2), c=color_observe, marker=',', s=0.1)
-            ax_cluster[cluster_observe].add_patch(Rectangle((x1, y1),
-                                   x2-x1, y2-y1,
-                                   fc=color_observe,
-                                   ec=color_observe,
-                                   #lw=10
-            ))
+            if y1 >= 0:
+                print("Observe: cluster:{}".format(cluster_observe))
+                draw_rectangle(ax_cluster[cluster_observe], color_observe, x1, y1, x2, y2)
+
+            # draw shadow region
+            # - move from DDR:           DDRtoL2 -> observe_start
+            # - move from other cluster: L2toL2  -> observe_start
+            # note that y1 and y2 is the same as previous ones
+            x1 = int(node.get('L2toL2', node.get('DDRtoL2', -1)))
+            x2 = int(node.get('observe_start', 0))
+            if x1 >= 0:
+                print("Shadow: cluster:{}".format(cluster_observe))
+                draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
+
+
             plt.show(block=False)
 
             # arrow
@@ -112,9 +137,9 @@ def draw_svg(nodes):
         input("Press one key to continue")
 
 
-filename = 'CCL_file_2cblk.txt'
+# filename = 'CCL_file_2cblk.txt'
 # filename = 'ccl_file_12May22.txt'
-# filename = 'CCL_file_test_smem_svg.txt'
+filename = 'CCL_file_test_smem_svg.txt'
 
 # parse ccl file: produce nodes dictionnary
 def test_draw_smem_layout():

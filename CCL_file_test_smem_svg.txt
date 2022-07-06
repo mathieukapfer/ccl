@@ -6,13 +6,13 @@
 # resources used
 [defining resource = pe2_0], [define memory offset = 100000];
 
-[phase = 0],
+[phase = 1],
 [action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 10(3)],
 [observation_ids(arg#s) = 1(1), 35(2)],
 #timing parameters
 [define = 0], [end_define = 100], [observe_start = 200], [observe_end = 400],
 # resources used
-[defining resource = pe2_0], [define memory offset = 200000];
+[defining resource = pe2_1], [define memory offset = 200000];
 
 [phase = 0],
 [action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 11(3)],
@@ -22,14 +22,13 @@
 # resources used
 [defining resource = pe2_0], [define memory offset = 400000];
 
-
-[phase = 0],
+[phase = 1],
 [action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 12(3)],
 [observation_ids(arg#s) = 1(1), 35(2)],
 #timing parameters
 [define = 400], [end_define = 500], [observe_start = 600], [observe_end = 700],
 # resources used
-[defining resource = pe2_0], [define memory offset = 150000];
+[defining resource = pe2_1], [define memory offset = 150000];
 
 [phase = 0],
 [action = descrambler_cfunc], [elementsize = 50000],[runtime = 40000], [definition_ID(arg#) = 13(3)],
@@ -46,3 +45,41 @@
 [define = 400], [end_define = 500], [observe_start = 600], [observe_end = 700],
 # resources used
 [defining resource = pe2_0], [define memory offset = 450000];
+
+
+# L2 to L2
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000], [runtime = 40000], [definition_ID(arg#) = 15(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 400], [end_define = 500], [L2toL2 = 550], [observe_start = 600], [observe_end = 700],
+# resources used
+[defining resource = pe2_0], [define memory offset = 500000], [observe memory offset = 400000];
+
+[phase = 0],
+[action = descrambler_cfunc], [elementsize = 50000], [runtime = 40000], [definition_ID(arg#) = 16(3)],
+[observation_ids(arg#s) = 15(1)],
+#timing parameters
+[define = 800], [end_define = 900], [observe_start = 1000], [observe_end = 1200],
+# resources used
+[defining resource = pe2_1], [define memory offset = 500000], [observe memory offset = 500000];
+
+
+# L2 to DDR
+
+[phase = 0,1],
+[action = descrambler_cfunc], [elementsize = 50000], [runtime = 40000], [definition_ID(arg#) = 17(3)],
+[observation_ids(arg#s) = 1(1), 35(2)],
+#timing parameters
+[define = 1000], [end_define = 1100], [L2toDDR = 1200], [DDRtoL2 = 0], [observe_start = 100], [observe_end = 200],
+# resources used
+[defining resource = pe2_0], [define memory offset = 500000], [observe memory offset = 400000];
+
+[phase = 1],
+[action = descrambler_cfunc], [elementsize = 50000], [runtime = 40000], [definition_ID(arg#) = 18(3)],
+[observation_ids(arg#s) = 17(1)],
+#timing parameters
+[define = 0], [end_define = 200], [observe_start = 1000], [observe_end = 1200],
+# resources used
+[defining resource = pe2_1], [define memory offset = 600000];
