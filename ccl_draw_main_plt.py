@@ -1,6 +1,7 @@
 import re
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.patches import Rectangle
 
 from ccl_parser.ccl_parse2 import ccl_file_parser
@@ -20,6 +21,38 @@ def draw_rectangle(ax, color, x1, y1, x2, y2):
                   #lw=10
                   ))
     print("({},{}) ({},{})".format(x1, y1, x2, y2))
+
+
+def push_draw_arrow_request(queue, cluster_tail, cluster_head, x1, y1, x2, y2):
+    """
+    Push arrow request to be draw at the end
+    """
+    queue.append((cluster_tail, cluster_head, x1, y1, x2, y2))
+    return queue
+
+
+def draw_arrow(fig, cluster_tail, cluster_head, x1, y1, x2, y2):
+    """
+    Draw cross figure arrow
+    see: https://www.cilyan.org/blog/2016/01/23/matplotlib-draw-between-subplots/
+    """
+    # Create the arrow
+    # 1. Get transformation operators for axis and figure
+    ax0tr = cluster_tail.transData  # Axis 0 -> Display
+    ax1tr = cluster_head.transData  # Axis 1 -> Display
+    figtr = fig.transFigure.inverted()  # Display -> Figure
+    # 2. Transform arrow start point from axis 0 to figure coordinates
+    ptB = figtr.transform(ax0tr.transform((x1, y1)))
+    # 3. Transform arrow end point from axis 1 to figure coordinates
+    ptE = figtr.transform(ax1tr.transform((x2, y2)))
+    # 4. Create the patch
+    arrow = mpl.patches.FancyArrowPatch(
+        ptB, ptE, transform=fig.transFigure,  # Place arrow in figure coord system
+        fc = "g", connectionstyle="arc3,rad=0.2", arrowstyle='simple', alpha = 0.3,
+        mutation_scale = 40.
+    )
+    # 5. Add patch to list of objects to draw onto the figure
+    fig.patches.append(arrow)
 
 
 def get_cluster(ressource_string):
@@ -42,6 +75,7 @@ def draw_svg(nodes):
     plt.style.use('seaborn')
 
     ax_cluster = [ax_cluster1, ax_cluster2]
+    arrows = list()
 
     for index in nodes:
         node = nodes[index]
@@ -84,6 +118,9 @@ def draw_svg(nodes):
         print("Shadow: cluster:{}".format(cluster_define))
         draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
 
+        # keep data to draw arrow
+        def_x2 = x2
+        def_y2 = y2
 
         # identify observer's cluster
         cluster_observes = list()
@@ -122,19 +159,20 @@ def draw_svg(nodes):
             if x1 >= 0:
                 print("Shadow: cluster:{}".format(cluster_observe))
                 draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
+                arrows = push_draw_arrow_request(arrows,
+                    ax_cluster[cluster_define], ax_cluster[cluster_observe],
+                    def_x2, def_y2, x1, y1
+                )
 
-
-            plt.show(block=False)
-
-            # arrow
-            # r = draw.Line(
-            #     x1/ratio_x, y1/ratio_y, x2/ratio_x, y2/ratio_y, width=10
-            # )
-            #print("Line: ({},{}) ({},{})".format(
-            #    x1/ratio_x, y1/ratio_y, x2/ratio_x, y2/ratio_y,
-            #))
+        plt.show(block=False)
 
         input("Press one key to continue")
+
+    # draw arrow cross axes
+    for arrow in arrows:
+        draw_arrow(fig, arrow[0], arrow[1], arrow[2], arrow[3], arrow[4], arrow[5])
+
+    plt.show(block=False)
 
 
 # filename = 'CCL_file_2cblk.txt'
