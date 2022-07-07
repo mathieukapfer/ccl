@@ -94,14 +94,14 @@ def draw_svg(nodes):
         name = "{}({})".format(node.get('action'),node.get('id'))
 
         if(node.get('phase') == '0'):
-            color_define = 'blue'
-            color_observe = 'red'
+            color_define = 'red'
+            color_observe = 'lightblue'
         elif(node.get('phase') == '1'):
-            color_define = 'cyan'
-            color_observe = 'pink'
+            color_define = 'pink'
+            color_observe = 'lightcyan'
         else:  # assuming 0,1
-            color_define = 'blue'
-            color_observe = 'pink'
+            color_define = 'red'
+            color_observe = 'lightcyan'
 
         print("{}:".format(name))
 
@@ -113,6 +113,8 @@ def draw_svg(nodes):
 
         print("Define: cluster:{}".format(cluster_define))
         draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
+        ax_cluster[cluster_define].annotate(node.get('id'), (x1, y1), fontsize=7)
+
         plt.show(block=False)
 
         # draw shadow region
@@ -164,7 +166,13 @@ def draw_svg(nodes):
             x2 = int(node.get('observe_start', 0))
             if x1 >= 0:
                 print("Shadow: cluster:{}".format(cluster_observe))
+                # rectangle
                 draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
+                # text
+                ax_cluster[cluster_observe].annotate(
+                    "({})".format(node.get('id')),
+                    (x1, y1), fontsize=7)
+                # arrow
                 draw_arrow(fig, ax_cluster[1],
                            ax_cluster[cluster_define], ax_cluster[cluster_observe],
                            def_x2, def_y2, x1, y1,
