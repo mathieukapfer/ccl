@@ -1,0 +1,19 @@
+# flow.top_level_test.stream.perUEGRP_SoftBits.1_cell0
+# pipeline.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = getSoftBitsData_cfunc], [elementsize = 256],[runtime = 128], [internal memory = 1000], [definition_ID(arg#) = 3(1)],
+#timing parameters
+[define = 12], [end_define = 12], [observe_start = 60], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = 110768], [internal memory offset = 0];
+
+# stream parameters
+[phase = 1, 2]
+[action = rate_dematch_cfunc], [elementsize = 23936],[runtime = 41000], [internal memory = 2000], [definition_ID(arg#) = 56(4)],
+[observation_ids(arg#s) = 3(2), 99(3)],
+[parameter_values(arg#s) = 1(1)],
+#timing parameters
+[define = 108], [end_define = 139], [L2toDDR = 141], [DDRtoL2 = 16], [observe_start = 21], [observe_end = 561],
+# resources used
+[defining resource = pe0_0], [define memory offset = 215456], [internal memory offset = 69944], [observe memory offset = 42704];

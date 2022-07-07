@@ -89,12 +89,13 @@ def draw_svg(nodes):
         # identify define cluster
         cluster_define = get_cluster(node.get('defining resource'))
 
-        # define color
-        # print(node)
+        print(node)
+
         # name = "{}({})".format(node.get('action'),node.get('id'))
         name_def = "{}({})".format(node.get('id'), node.get('phase-def'))
         name_obs = ">{}({})".format(node.get('id'), node.get('phase-obs'))
 
+        # define color
         if(node.get('phase-def') == 0):
             color_define = '#FF0000'
         elif(node.get('phase') == 1):
@@ -111,7 +112,7 @@ def draw_svg(nodes):
 
         #print("{}:".format(name))
 
-        # draw define buffer
+        # draw define bloc
         x1 = int(node.get('define', 0))
         y1 = int(node.get('define memory offset', 0))
         x2 = int(node.get('end_define', 0))
@@ -123,7 +124,18 @@ def draw_svg(nodes):
 
         plt.show(block=False)
 
+        # draw working buffer bloc :
+        # same timing as 'define bloc (x) , just other memory offset and size (y)
+        y1m = int(node.get('internal memory offset', 0))
+        y2m = y1m + int(node.get('internal memory', 0))
+
+        if y1m > 0:
+            print("Working buffer: cluster:{}".format(cluster_define))
+            draw_rectangle(ax_cluster[cluster_define], 'green', x1, y1m, x2, y2m)
+            ax_cluster[cluster_define].annotate(name_def, (x1, y1m), fontsize=7)
+
         # draw shadow region
+        # same memory position (y) as 'define' bloc, just other timing(x)
         # - move to DDR:           end_define -> L2toDDR,
         # - move to other cluster: end_define -> L2toL2,
         # - same cluster:          end_define -> observe_start
@@ -188,7 +200,8 @@ def draw_svg(nodes):
         # input("Press one key to continue")
 
 
-filename = 'data/CCL_file_2cblk.txt'
+filename = "data/CCL_file_phase3.txt"
+#filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
 
