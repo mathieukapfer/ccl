@@ -90,20 +90,26 @@ def draw_svg(nodes):
         cluster_define = get_cluster(node.get('defining resource'))
 
         # define color
-        print(node)
-        name = "{}({})".format(node.get('action'),node.get('id'))
+        # print(node)
+        # name = "{}({})".format(node.get('action'),node.get('id'))
+        name_def = "{}({})".format(node.get('id'), node.get('phase-def'))
+        name_obs = ">{}({})".format(node.get('id'), node.get('phase-obs'))
 
-        if(node.get('phase') == '0'):
-            color_define = 'red'
-            color_observe = 'lightblue'
-        elif(node.get('phase') == '1'):
-            color_define = 'pink'
-            color_observe = 'lightcyan'
-        else:  # assuming 0,1
-            color_define = 'red'
-            color_observe = 'lightcyan'
+        if(node.get('phase-def') == 0):
+            color_define = '#FF0000'
+        elif(node.get('phase') == 1):
+            color_define = '#FF3333'
+        else:  # assuming 2
+            color_define = '#FF6666'
 
-        print("{}:".format(name))
+        if(node.get('phase-obs') == 0):
+            color_observe = '#0000FF'
+        elif(node.get('phase-obs') == 1):
+            color_observe = '#3333FF'
+        else:  # assuming 2
+            color_observe = '#6666FF'
+
+        #print("{}:".format(name))
 
         # draw define buffer
         x1 = int(node.get('define', 0))
@@ -113,7 +119,7 @@ def draw_svg(nodes):
 
         print("Define: cluster:{}".format(cluster_define))
         draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
-        ax_cluster[cluster_define].annotate(node.get('id'), (x1, y1), fontsize=7)
+        ax_cluster[cluster_define].annotate(name_def, (x1, y1), fontsize=7)
 
         plt.show(block=False)
 
@@ -169,9 +175,7 @@ def draw_svg(nodes):
                 # rectangle
                 draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
                 # text
-                ax_cluster[cluster_observe].annotate(
-                    "({})".format(node.get('id')),
-                    (x1, y1), fontsize=7)
+                ax_cluster[cluster_observe].annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
                 draw_arrow(fig, ax_cluster[1],
                            ax_cluster[cluster_define], ax_cluster[cluster_observe],
@@ -184,12 +188,15 @@ def draw_svg(nodes):
         # input("Press one key to continue")
 
 
-filename = 'CCL_file_2cblk.txt'
-# filename = 'ccl_file_12May22.txt'
-# filename = 'CCL_file_test_smem_svg.txt'
+filename = 'data/CCL_file_2cblk.txt'
+# filename = 'data/ccl_file_12May22.txt'
+# filename = 'data/CCL_file_test_smem_svg.txt'
 
-# parse ccl file: produce nodes dictionnary
+
 def test_draw_smem_layout():
+    """
+    Display SMEM layout of CCLfile named 'filename'
+    """
     nodes = ccl_file_parser(filename)
     draw_svg(nodes)
 

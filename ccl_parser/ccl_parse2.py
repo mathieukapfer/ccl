@@ -8,7 +8,7 @@ sep = "[\s,]+"
 
 sep0 = "[\s,]*"
 
-endofstream = "[\s;]+"
+endofstream = "[\s]*;[\s]*"
 
 keywords = [
     "CCLtype",
@@ -17,17 +17,21 @@ keywords = [
     "observation_ids\(arg#s\)",
     "define", "end_define", "L2toL2", "L2toDDR", "DDRtoL2", "observe_start", "observe_end",
     "defining resource", "define memory offset", "observe memory offset",
+    # phase 3 addons
+    "internal memory offset", "internal memory",  # working buffer: offset and size
+    "parameter_values\(arg#s\)",  # const
     ]
 
 regexp_id = "(\d+)\((\d+)\)"  # 1(2)
 
 keywords_value = {
     "CCLtype":                     "([\w]+)",
-    "phase":                       "([\w ,]+)",
+    "phase":                       "(([\w]+)" + sep0 + "([\w]*))",   # define and observe phase
     "action":                      "([\w]+)",
     "elementsize":                 "([\d]+)",
     "runtime":                     "([\d]+)",
     "definition_ID\(arg#\)":       "(" + regexp_id + ")",
+    "parameter_values\(arg#s\)":     "(" + regexp_id + ")",
     "observation_ids\(arg#s\)":    "((" + regexp_id + sep0 + ")+)",
     "define":                      "([\d]+)",
     "end_define":                  "([\d]+)",
@@ -39,6 +43,8 @@ keywords_value = {
     "defining resource":           "([\w]+)",
     "define memory offset":        "([-\d]+)",  # maybe negative !
     "observe memory offset":       "([\d]+)",
+    "internal memory offset":      "([-\d]+)",
+    "internal memory":             "([\d]+)",
 }
 
 
@@ -64,8 +70,17 @@ def ccl_item_parser(key, value, node_dict):
 
     # special keys
     if key == 'phase':
-        # phase (todo : extract list of phases)
-        node_dict[key] = value
+        # phase : extract define and observe phase
+        m = re.match(keywords_value[key], value)
+        # parse 'define' phase
+        phase_def_str = m.group(2)
+        phase_obs_str = m.group(3)
+        node_dict['phase-def'] = int(phase_def_str)
+        # get 'observe' phase: different if present
+        if phase_obs_str == '':
+            node_dict['phase-obs'] = node_dict['phase-def']
+        else:
+            node_dict['phase-obs'] = int(phase_obs_str)
 
     elif key == "definition_ID\(arg#\)":
         # refine value: extract id and position
@@ -84,6 +99,9 @@ def ccl_item_parser(key, value, node_dict):
             n = re.search(regexp_id, value[pos:])
         node_dict['obs_ids'] = obs_ids
     # other keys
+    elif key == "parameter_values\(arg#s\)":
+        # change key name
+        node_dict['const'] = value
     else:
         node_dict[key] = value
 
@@ -147,21 +165,27 @@ def ccl_file_parser(filename):
                 error = True
                 print("Skip: " + line[pos:])
 
-
     # status
     if error is False:
         print("\n\nNo error found:")
         print(" {} keywords found".format(nb_keys_found))
         print(" {} nodes detected".format(len(nodes_dict)))
         print(nodes_dict)
-
-    return nodes_dict
+        return nodes_dict
+    else:
+        print("\n\nError bound - see above what has been 'Skip'")
+        return()
 
 
 #if __name__ == "__main__":
-def main():
-    # d = ccl_file_parser('CCL_file_2cblk.txt')
-    d = ccl_file_parser('ccl_file_12May22.txt')
-    print(d)
+def test_ccl_parsing():
 
-# main()
+    # filename = "data/CCL_file_phase3.txt"
+    # filename = 'data/ccl_file_12May22.txt'
+    # filename = 'data/CCL_file_2cblk.txt'
+    filename = "data/CCL_file_extract.txt"
+
+    d = ccl_file_parser(filename)
+
+
+test_ccl_parsing()

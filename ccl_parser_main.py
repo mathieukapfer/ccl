@@ -31,7 +31,12 @@ def ccl_to_graph(filename):
     write_dot_graph(G)
 
 
-filename = 'CCL_file_2cblk.txt'
+# filename = 'CCL_file_2cblk.txt'
 # filename = 'ccl_file_12May22.txt'
+# filename = 'CCL_file_orig.txt'
+# filename = 'CCL_file_pool.txt'
+# filename = "CCL_file_ldpc_exec_pool.txt"
+# filename = "data/CCL_file_phase3.txt"
+filename = "data/CCL_file_extract.txt"
 
 ccl_to_graph(filename)

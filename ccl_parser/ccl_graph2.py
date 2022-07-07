@@ -7,11 +7,20 @@ def format_node_name(node):
        input: node dictionary
        return string of long name of the given node
     """
+    # phase
+    if node.get('phase-obs') == node.get('phase-def'):
+        phase_str = node.get('phase-def')
+    else:
+        phase_str = "{}->{}".format(node.get('phase-def'),
+                                    node.get('phase-obs'))
+    print(node)
+    print(phase_str)
+
     return "{}\n ({})\n phase{}".format(
         #\n size:{} \n runtime:{}
         node.get('action'),
         node.get('id'),
-        node.get('phase'),
+        phase_str,
         # node_description.get('elementsize'),
         # node_description.get('runtime'),
         )
