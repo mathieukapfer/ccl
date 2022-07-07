@@ -1,17 +1,15 @@
 import re
 
 import matplotlib.pyplot as plt
-
 from matplotlib.patches import Rectangle
 from matplotlib.patches import ConnectionPatch
-from matplotlib.patches import FancyArrowPatch
 
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
 
 def draw_rectangle(ax, color, x1, y1, x2, y2):
     """
-    Draw plot and rectangle as patch
+    Plot corner and adding rectangle as patch above
     """
     ax.scatter(
         (x1, x2), (y1, y2), c=color, marker=',', s=0.1)
@@ -20,58 +18,49 @@ def draw_rectangle(ax, color, x1, y1, x2, y2):
                   x2-x1, y2-y1,
                   fc=color,
                   ec=color,
-                  #lw=10
-                  ))
+                  # lw=10
+        ))
     print("({},{}) ({},{})".format(x1, y1, x2, y2))
 
 
-def push_draw_arrow_request(queue, cluster_tail, cluster_head, x1, y1, x2, y2):
-    """
-    Push arrow request
-    to be draw at the end when figure dimention is defined
-    """
-    queue.append((cluster_tail, cluster_head, x1, y1, x2, y2))
-    return queue
-
-
-def draw_arrow2(fig, cluster_tail, cluster_head, x1, y1, x2, y2):
+def draw_arrow(fig, last_axes, axes_tail, axes_head, x1, y1, x2, y2, style):
     """
     Draw cross figure arrow
     https://matplotlib.org/3.1.0/gallery/userdemo/connect_simple01.html
     """
-    con = ConnectionPatch(xyA=(x1, y1), coordsA='data', axesA=cluster_tail,
-                          xyB=(x2, y2), coordsB='data', axesB=cluster_head,
-                          connectionstyle="arc3,rad=0.2", arrowstyle="->", # shrinkB=5
+    con = ConnectionPatch(xyA=(x1, y1), coordsA='data', axesA=axes_tail,  # shrinkB=5
+                          xyB=(x2, y2), coordsB='data', axesB=axes_head,
+                          connectionstyle=style['connectionstyle'],
+                          arrowstyle=style['arrowstyle'],
+                          color=style['color']
     )
     print('Arrow {},{}->{},{}'.format(x1, y1, x2, y2))
-    cluster_head.add_artist(con)
-    #cluster_tail.add_artist(con)
+    last_axes.add_artist(con)
 
 
-
-def draw_arrow(fig, cluster_tail, cluster_head, x1, y1, x2, y2):
+def arrow_style(node):
     """
-    Draw cross figure arrow
-    see: https://www.cilyan.org/blog/2016/01/23/matplotlib-draw-between-subplots/
+    Return style of arrow depending of node
     """
-    # Create the arrow
-    # 1. Get transformation operators for axis and figure
-    ax0tr = cluster_tail.transData  # Axis 0 -> Display
-    ax1tr = cluster_head.transData  # Axis 1 -> Display
-    figtr = fig.transFigure.inverted()  # Display -> Figure
-    # 2. Transform arrow start point from axis 0 to figure coordinates
-    ptB = figtr.transform(ax0tr.transform((x1, y1)))
-    # 3. Transform arrow end point from axis 1 to figure coordinates
-    ptE = figtr.transform(ax1tr.transform((x2, y2)))
-    # 4. Create the patch
-    arrow = FancyArrowPatch(
-        ptB, ptE, transform=fig.transFigure,  # Place arrow in figure coord system
-        fc = "g", connectionstyle="arc3,rad=0.2", arrowstyle='simple', alpha = 0.3,
-        mutation_scale = 4.
-    )
-    # 5. Add patch to list of objects to draw onto the figure
-    fig.patches.append(arrow)
+    # default value
+    connectionstyle = "arc3,rad=0.2"
+    arrowstyle = "->"
+    color = 'black'
 
+    # specific value
+    if int(node.get('L2toL2', -1)) > 0:
+        connectionstyle = "arc3,rad=0.1"
+        arrowstyle = "->"
+        color = 'black'
+    elif int(node.get('L2toDDR', -1)) > 0:
+        connectionstyle = "arc3,rad=0.3"
+        arrowstyle = "->"
+        color = 'red'
+    return {
+        'connectionstyle': connectionstyle,
+        'arrowstyle': arrowstyle,
+        'color': color
+    }
 
 def get_cluster(ressource_string):
     """
@@ -84,16 +73,15 @@ def get_cluster(ressource_string):
 
 def draw_svg(nodes):
     """
-    Draw SMEM usage in svg format x:time, y:space
+    Draw SMEM usage: x:time, y:addr
     """
-    #d = draw.Drawing(2000, 2000, origin=(0,0), displayInline=False)
+
     fig = plt.figure()
     ax_cluster1 = fig.add_subplot(211)
     ax_cluster2 = fig.add_subplot(212)
     plt.style.use('seaborn')
 
     ax_cluster = [ax_cluster1, ax_cluster2]
-    arrows = list()
 
     for index in nodes:
         node = nodes[index]
@@ -136,7 +124,7 @@ def draw_svg(nodes):
         print("Shadow: cluster:{}".format(cluster_define))
         draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
 
-        # keep data to draw arrow
+        # keep data to draw arrow later
         def_x2 = x2
         def_y2 = y2
 
@@ -155,10 +143,10 @@ def draw_svg(nodes):
             # no data mvt, observer(s) are in the same cluster as definer
             cluster_observes.append(cluster_define)
 
-        # draw observer buffer
+        # draw observer items
         for cluster_observe in list(set(cluster_observes)):
 
-            # observed bloc
+            # observer bloc
             x1 = int(node.get('observe_start', 0))
             y1 = int(node.get('observe memory offset', node.get('define memory offset', -1)))
             x2 = int(node.get('observe_end', 0))
@@ -168,7 +156,7 @@ def draw_svg(nodes):
                 print("Observe: cluster:{}".format(cluster_observe))
                 draw_rectangle(ax_cluster[cluster_observe], color_observe, x1, y1, x2, y2)
 
-            # draw shadow region
+            # draw shadow region & arrow
             # - move from DDR:           DDRtoL2 -> observe_start
             # - move from other cluster: L2toL2  -> observe_start
             # note that y1 and y2 is the same as previous ones
@@ -177,22 +165,15 @@ def draw_svg(nodes):
             if x1 >= 0:
                 print("Shadow: cluster:{}".format(cluster_observe))
                 draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
-                #arrows = push_draw_arrow_request(arrows,
-                draw_arrow2(fig,
-                            ax_cluster[cluster_define], ax_cluster[cluster_observe],
-                            def_x2, def_y2, x1, y1
+                draw_arrow(fig, ax_cluster[1],
+                           ax_cluster[cluster_define], ax_cluster[cluster_observe],
+                           def_x2, def_y2, x1, y1,
+                           arrow_style(node)
                 )
 
         plt.show(block=False)
 
         # input("Press one key to continue")
-
-    # draw arrow cross axes
-    #input("Press one key to continue")
-    #for arrow in arrows:
-    #    draw_arrow(fig, arrow[0], arrow[1], arrow[2], arrow[3], arrow[4], arrow[5])
-
-    plt.show(block=False)
 
 
 filename = 'CCL_file_2cblk.txt'
