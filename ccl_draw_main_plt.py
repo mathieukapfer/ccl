@@ -62,6 +62,7 @@ def arrow_style(node):
         'color': color
     }
 
+
 def get_cluster(ressource_string):
     """
     Return last digit of 'define resource' known as cluster
@@ -71,7 +72,22 @@ def get_cluster(ressource_string):
     return cluster
 
 
-def draw_svg(nodes):
+def get_color_box(phase_define, phase_observe):
+    """
+    Return box color depending on phase
+       - input phases: (phase define, phase observe)
+       - return        (color define, color observe)
+    """
+    color_defines = ['#FF0000', '#FF3333', '#FF6666']
+    color_observe = ['#0000FF', '#3333FF', '#6666FF']
+
+    color_define = color_defines[phase_define % 3]
+    color_observe = color_observe[phase_define % 3]
+
+    return (color_define, color_observe)
+
+
+def draw_smem_map(nodes):
     """
     Draw SMEM usage: x:time, y:addr
     """
@@ -88,7 +104,9 @@ def draw_svg(nodes):
 
         # identify define cluster
         cluster_define = get_cluster(node.get('defining resource'))
+        ax_def = ax_cluster[cluster_define]
 
+        # log
         print(node)
 
         # name = "{}({})".format(node.get('action'),node.get('id'))
@@ -96,21 +114,8 @@ def draw_svg(nodes):
         name_obs = ">{}({})".format(node.get('id'), node.get('phase-obs'))
 
         # define color
-        if(node.get('phase-def') == 0):
-            color_define = '#FF0000'
-        elif(node.get('phase') == 1):
-            color_define = '#FF3333'
-        else:  # assuming 2
-            color_define = '#FF6666'
-
-        if(node.get('phase-obs') == 0):
-            color_observe = '#0000FF'
-        elif(node.get('phase-obs') == 1):
-            color_observe = '#3333FF'
-        else:  # assuming 2
-            color_observe = '#6666FF'
-
-        #print("{}:".format(name))
+        (color_define, color_observe) = get_color_box(
+            node.get('phase-def'), node.get('phase-obs'))
 
         # draw define bloc
         x1 = int(node.get('define', 0))
@@ -120,8 +125,8 @@ def draw_svg(nodes):
 
         if y1 > 0:
             print("Define: cluster:{}".format(cluster_define))
-            draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
-            ax_cluster[cluster_define].annotate(name_def, (x1, y1), fontsize=7)
+            draw_rectangle(ax_def, color_define, x1, y1, x2, y2)
+            ax_def.annotate(name_def, (x1, y1), fontsize=7)
 
         # draw working buffer bloc :
         # same timing as 'define bloc (x) , just other memory offset and size (y)
@@ -130,8 +135,8 @@ def draw_svg(nodes):
 
         if y1m > 0:
             print("Working buffer: cluster:{}".format(cluster_define))
-            draw_rectangle(ax_cluster[cluster_define], 'green', x1, y1m, x2, y2m)
-            ax_cluster[cluster_define].annotate(name_def, (x1, y1m), fontsize=7)
+            draw_rectangle(ax_def, "coral", x1, y1m, x2, y2m)
+            ax_def.annotate(name_def + ".", (x1, y1m), fontsize=7)
 
         # draw shadow region
         # same memory position (y) as 'define' bloc, just other timing(x)
@@ -143,13 +148,13 @@ def draw_svg(nodes):
 
         if y1 > 0:
             print("Shadow: cluster:{}".format(cluster_define))
-            draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
+            draw_rectangle(ax_def, 'gray', x1, y1, x2, y2)
 
         # keep data to draw arrow later
         def_x2 = x2
         def_y1 = y1
 
-        # identify observer's cluster
+        # identify observers's cluster
         cluster_observes = list()
         if node.get('observe memory offset', []):
             # search observer localisation
@@ -164,8 +169,10 @@ def draw_svg(nodes):
             # no data mvt, observer(s) are in the same cluster as definer
             cluster_observes.append(cluster_define)
 
-        # draw observer items
+        # draw observers's items
         for cluster_observe in list(set(cluster_observes)):
+
+            ax_obs = ax_cluster[cluster_observe]
 
             # observer bloc
             x1 = int(node.get('observe_start', 0))
@@ -175,7 +182,7 @@ def draw_svg(nodes):
 
             if y1 >= 0:
                 print("Observe: cluster:{}".format(cluster_observe))
-                draw_rectangle(ax_cluster[cluster_observe], color_observe, x1, y1, x2, y2)
+                draw_rectangle(ax_obs, color_observe, x1, y1, x2, y2)
 
             # draw shadow region & arrow
             # - move from DDR:           DDRtoL2 -> observe_start
@@ -186,13 +193,13 @@ def draw_svg(nodes):
             if x1 >= 0:
                 print("Shadow: cluster:{}".format(cluster_observe))
                 # rectangle
-                draw_rectangle(ax_cluster[cluster_observe], 'gray', x1, y1, x2, y2)
+                draw_rectangle(ax_obs, 'gray', x1, y1, x2, y2)
                 # text
-                ax_cluster[cluster_observe].annotate(name_obs, (x1, y1), fontsize=7)
+                ax_obs.annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
                     draw_arrow(fig, ax_cluster[1],
-                               ax_cluster[cluster_define], ax_cluster[cluster_observe],
+                               ax_def, ax_obs,
                                def_x2, def_y1, x1, y1,
                                arrow_style(node)
                 )
@@ -203,7 +210,7 @@ def draw_svg(nodes):
 
 
 filename = "data/CCL_file_phase3.txt"
-#filename = 'data/CCL_file_2cblk.txt'
+# filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
 
@@ -213,7 +220,7 @@ def test_draw_smem_layout():
     Display SMEM layout of CCLfile named 'filename'
     """
     nodes = ccl_file_parser(filename)
-    draw_svg(nodes)
+    draw_smem_map(nodes)
 
 
 test_draw_smem_layout()
