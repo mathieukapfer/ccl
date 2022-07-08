@@ -118,11 +118,10 @@ def draw_svg(nodes):
         x2 = int(node.get('end_define', 0))
         y2 = y1 + int(node.get('elementsize', 0))
 
-        print("Define: cluster:{}".format(cluster_define))
-        draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
-        ax_cluster[cluster_define].annotate(name_def, (x1, y1), fontsize=7)
-
-        plt.show(block=False)
+        if y1 > 0:
+            print("Define: cluster:{}".format(cluster_define))
+            draw_rectangle(ax_cluster[cluster_define], color_define, x1, y1, x2, y2)
+            ax_cluster[cluster_define].annotate(name_def, (x1, y1), fontsize=7)
 
         # draw working buffer bloc :
         # same timing as 'define bloc (x) , just other memory offset and size (y)
@@ -141,12 +140,14 @@ def draw_svg(nodes):
         # - same cluster:          end_define -> observe_start
         x1 = x2
         x2 = int(node.get('L2toL2', node.get('L2toDDR', node.get('observe_start'))))
-        print("Shadow: cluster:{}".format(cluster_define))
-        draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
+
+        if y1 > 0:
+            print("Shadow: cluster:{}".format(cluster_define))
+            draw_rectangle(ax_cluster[cluster_define], 'gray', x1, y1, x2, y2)
 
         # keep data to draw arrow later
         def_x2 = x2
-        def_y2 = y2
+        def_y1 = y1
 
         # identify observer's cluster
         cluster_observes = list()
@@ -189,10 +190,11 @@ def draw_svg(nodes):
                 # text
                 ax_cluster[cluster_observe].annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
-                draw_arrow(fig, ax_cluster[1],
-                           ax_cluster[cluster_define], ax_cluster[cluster_observe],
-                           def_x2, def_y2, x1, y1,
-                           arrow_style(node)
+                if def_y1 > 0:  # remove erroneous broadcast display [TMP]
+                    draw_arrow(fig, ax_cluster[1],
+                               ax_cluster[cluster_define], ax_cluster[cluster_observe],
+                               def_x2, def_y1, x1, y1,
+                               arrow_style(node)
                 )
 
         plt.show(block=False)
