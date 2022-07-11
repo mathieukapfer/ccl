@@ -95,6 +95,7 @@ def draw_smem_map(nodes):
     fig = plt.figure()
     ax_cluster1 = fig.add_subplot(211)
     ax_cluster2 = fig.add_subplot(212)
+
     plt.style.use('seaborn')
 
     ax_cluster = [ax_cluster1, ax_cluster2]
@@ -197,6 +198,9 @@ def draw_smem_map(nodes):
                 # text
                 ax_obs.annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
+                # - if broadcast, replace by source
+                if def_y1 < 0:
+                    def_y1 = get_broadcast_source(nodes, node)
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
                     draw_arrow(fig, ax_cluster[1],
                                ax_def, ax_obs,
@@ -209,7 +213,28 @@ def draw_smem_map(nodes):
         # input("Press one key to continue")
 
 
-filename = "data/CCL_file_phase3.txt"
+def get_broadcast_source(nodes, node):
+    """
+    Detect broascast as follow:
+    if define memory offset is equal to '-1', then
+    get memory address of same action and same define time
+    """
+    for index in nodes:
+        loop_node = nodes[index]
+        if (loop_node.get('action') == node.get('action') and
+            loop_node.get('define') == node.get('define')):
+            offset = int(loop_node.get('define memory offset'))
+            if offset > 0:
+                print(">Broadcast source found: {} @ {}".format(
+                    loop_node.get('action'),
+                    loop_node.get('define memory offset')))
+                return offset
+    return -1
+
+# filename = "data/CCL_file_phase3.txt"
+filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
+# filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
+# filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
