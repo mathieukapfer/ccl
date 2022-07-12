@@ -6,6 +6,7 @@ from matplotlib.patches import ConnectionPatch
 
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
+import pickle as plk
 
 def draw_rectangle(ax, color, x1, y1, x2, y2):
     """
@@ -216,6 +217,8 @@ def draw_smem_map(nodes):
 
         # input("Press one key to continue")
 
+    return fig
+
 
 def get_broadcast_source(nodes, node):
     """
@@ -253,7 +256,18 @@ def test_draw_smem_layout():
     Display SMEM layout of CCLfile named 'filename'
     """
     nodes = ccl_file_parser(filename)
-    draw_smem_map(nodes)
+    fig = draw_smem_map(nodes)
+
+    # save with pickle
+    plk.dump(fig, open('smem_fig.pickle', 'wb'))
+
+
+def load_pickle():
+    # import other modules needed to work with the figure, such as np, plt etc.
+    figx = plk.load(open('smem_fig.pickle', 'rb'))
+    figx.show()
 
 
 test_draw_smem_layout()
+
+# load_pickle()
