@@ -36,7 +36,8 @@ def ccl_to_graph(filename):
 # filename = 'CCL_file_orig.txt'
 # filename = 'CCL_file_pool.txt'
 # filename = "CCL_file_ldpc_exec_pool.txt"
-# filename = "data/CCL_file_phase3.txt"
-filename = "data/CCL_file_extract.txt"
+# filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
+filename = "data/ToKalray07JUL22/CCL_file.txt"    # Tx
+# filename = "data/CCL_file_extract.txt"
 
 ccl_to_graph(filename)

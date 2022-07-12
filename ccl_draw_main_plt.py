@@ -94,7 +94,11 @@ def draw_smem_map(nodes):
 
     fig = plt.figure()
     ax_cluster1 = fig.add_subplot(211)
+    plt.title("Cluster 1")
+    plt.ylabel('SMEM addr')
     ax_cluster2 = fig.add_subplot(212)
+    plt.title("Cluster 2")
+    plt.ylabel('SMEM addr')
 
     plt.style.use('seaborn')
 
@@ -198,7 +202,7 @@ def draw_smem_map(nodes):
                 # text
                 ax_obs.annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
-                # - if broadcast, replace by source
+                # - if broadcast, deplace '-1' by source
                 if def_y1 < 0:
                     def_y1 = get_broadcast_source(nodes, node)
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
@@ -215,9 +219,13 @@ def draw_smem_map(nodes):
 
 def get_broadcast_source(nodes, node):
     """
-    Detect broascast as follow:
-    if define memory offset is equal to '-1', then
-    get memory address of same action and same define time
+    Search the original source of a broadcasted item.
+    In other word, if define memory offset is equal to '-1', then
+    search one node with
+     - positive 'define memory offset'
+     - same 'action'
+     - define at same define time
+    and return it
     """
     for index in nodes:
         loop_node = nodes[index]
