@@ -6,7 +6,6 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 
 def draw_stat(nodes, ax):
 
-
     # list of events by cluster
     events = [[], []]
 
@@ -18,17 +17,26 @@ def draw_stat(nodes, ax):
         cluster = node.get('cluster')
 
         if int(node.get('define', -1)) > 0:
+
+            # Handle super PE as 4 PE
+            if node.get('defining resource')[0:3] == 'sPE':
+                delta = 4
+            else:
+                delta = 1
+            print(delta)
+
+            # Managed +/-
             events[cluster].append({
                 'date': int(node.get('define')),
                 'event': 'PE',
-                'value': 1})
+                'value': delta})
 
             events[cluster].append({
                 'date': int(node.get('end_define')),
                 'event': 'PE',
-                'value': -1})
+                'value': -delta})
 
-    # 2 - Create nb PEs curve
+    # 2 - Create 'nb PEs' curve
     for events_by_cluster in events:
 
         cluster = events.index(events_by_cluster)
@@ -108,4 +116,4 @@ def test_stat():
     plt.show(block=False)
 
 
-#test_stat()
+# test_stat()
