@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 # prepare conntent
 t = np.arange(0.01, 5.0, 0.01)
@@ -6,6 +7,7 @@ s1 = np.sin(2 * np.pi * t)
 s2 = np.exp(-t)
 s3 = np.sin(4 * np.pi * t)
 s4 = np.sin(2 * np.pi * t)
+
 
 # helper
 def annotate_axes(ax, text, fontsize=18):
