@@ -80,7 +80,7 @@ def get_color_box(phase_define, phase_observe):
     return (color_define, color_observe)
 
 
-def draw_smem_map(nodes, fig, ax_clusters):
+def draw_smem_map(nodes, fig, last_ax, ax_clusters):
     """
     Draw SMEM usage: x:time, y:addr
     """
@@ -187,14 +187,13 @@ def draw_smem_map(nodes, fig, ax_clusters):
                 if def_y1 < 0:
                     def_y1 = get_broadcast_source(nodes, node)
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
-                    draw_arrow(fig, ax_clusters[1],
+                    draw_arrow(fig, last_ax,
                                ax_def, ax_obs,
                                def_x2, def_y1, x1, y1,
                                arrow_style(node)
                 )
 
-        plt.show(block=False)
-
+        # plt.show(block=False)
         # input("Press one key to continue")
 
     return fig
@@ -251,13 +250,16 @@ def test_draw_smem_layout():
     ax_clusters = [ax_cluster1, ax_cluster2]
 
     nodes = ccl_file_parser(filename)
-    fig = draw_smem_map(nodes, fig, ax_clusters)
+    fig = draw_smem_map(nodes, fig, ax_cluster2, ax_clusters)
+
+    # show
+    plt.show(block=False)
 
     # save with pickle
     plk.dump(fig, open('smem_fig.pickle', 'wb'))
 
 
-test_draw_smem_layout()
+# test_draw_smem_layout()
 
 
 def load_pickle():

@@ -76,9 +76,7 @@ def draw_stat(nodes, ax):
         # plot cluster curve
         ax[cluster].plot(
             x, y,
-            linewidth=2, marker='o', c='black', markersize=2)
-
-        plt.show(block=False)
+            linewidth=1, marker='.', c='black', markersize=0)
 
 
 # filename = "data/CCL_file_phase3.txt"
@@ -104,7 +102,10 @@ def test_stat():
     nodes = ccl_file_parser(filename)
 
     # draw stat
-    return draw_stat(nodes, ax)
+    draw_stat(nodes, ax)
+
+    # show
+    plt.show(block=False)
 
 
-test_stat()
+#test_stat()
