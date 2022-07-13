@@ -65,15 +65,6 @@ def arrow_style(node):
     }
 
 
-def get_cluster(ressource_string):
-    """
-    Return last digit of 'define resource' known as cluster
-    """
-    m = re.match("([\w]+)_(\d)", ressource_string) # 'pe3_9'
-    cluster = int(m[2])
-    return cluster
-
-
 def get_color_box(phase_define, phase_observe):
     """
     Return box color depending on phase
@@ -98,7 +89,7 @@ def draw_smem_map(nodes, fig, ax_clusters):
         node = nodes[index]
 
         # identify define cluster
-        cluster_define = get_cluster(node.get('defining resource'))
+        cluster_define = node.get('cluster')
         ax_def = ax_clusters[cluster_define]
 
         # log
@@ -159,7 +150,7 @@ def draw_smem_map(nodes, fig, ax_clusters):
                     if obs == node.get('id'):
                         resource = nodes[key_obs]['defining resource']
                         print("found obs {} run on {}".format(nodes[key_obs]['id'], resource))
-                        cluster_observes.append(get_cluster(resource))
+                        cluster_observes.append(nodes[key_obs]['cluster'])
         else:
             # no data mvt, observer(s) are in the same cluster as definer
             cluster_observes.append(cluster_define)

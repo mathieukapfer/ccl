@@ -82,6 +82,13 @@ def ccl_item_parser(key, value, node_dict):
         else:
             node_dict['phase-obs'] = int(phase_obs_str)
 
+    elif key == 'defining resource':
+        # add all name
+        node_dict[key] = value
+        # extract cluster
+        m = re.match("([\w]+)_(\d)", value)  # 'pe3_9'
+        node_dict['cluster'] = int(m[2])
+
     elif key == "definition_ID\(arg#\)":
         # refine value: extract id and position
         m = re.match(keywords_value[key], value)

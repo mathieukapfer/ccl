@@ -1,3 +1,5 @@
+import re
+
 import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
@@ -13,7 +15,7 @@ def draw_stat(nodes, ax):
         node = nodes[index]
 
         # create event
-        cluster = get_cluster(node.get('defining resource'))
+        cluster = node.get('cluster')
 
         if int(node.get('define', -1)) > 0:
             events[cluster].append({
@@ -86,6 +88,7 @@ filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
+
 
 def test_stat():
     """
