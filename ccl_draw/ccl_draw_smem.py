@@ -89,29 +89,17 @@ def get_color_box(phase_define, phase_observe):
     return (color_define, color_observe)
 
 
-def draw_smem_map(nodes):
+def draw_smem_map(nodes, fig, ax_clusters):
     """
     Draw SMEM usage: x:time, y:addr
     """
-
-    fig = plt.figure()
-    ax_cluster1 = fig.add_subplot(211)
-    plt.title("Cluster 1")
-    plt.ylabel('SMEM addr')
-    ax_cluster2 = fig.add_subplot(212)
-    plt.title("Cluster 2")
-    plt.ylabel('SMEM addr')
-
-    plt.style.use('seaborn')
-
-    ax_cluster = [ax_cluster1, ax_cluster2]
 
     for index in nodes:
         node = nodes[index]
 
         # identify define cluster
         cluster_define = get_cluster(node.get('defining resource'))
-        ax_def = ax_cluster[cluster_define]
+        ax_def = ax_clusters[cluster_define]
 
         # log
         print(node)
@@ -179,7 +167,7 @@ def draw_smem_map(nodes):
         # draw observers's items
         for cluster_observe in list(set(cluster_observes)):
 
-            ax_obs = ax_cluster[cluster_observe]
+            ax_obs = ax_clusters[cluster_observe]
 
             # observer bloc
             x1 = int(node.get('observe_start', 0))
@@ -208,7 +196,7 @@ def draw_smem_map(nodes):
                 if def_y1 < 0:
                     def_y1 = get_broadcast_source(nodes, node)
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
-                    draw_arrow(fig, ax_cluster[1],
+                    draw_arrow(fig, ax_clusters[1],
                                ax_def, ax_obs,
                                def_x2, def_y1, x1, y1,
                                arrow_style(node)
@@ -243,6 +231,7 @@ def get_broadcast_source(nodes, node):
                 return offset
     return -1
 
+
 # filename = "data/CCL_file_phase3.txt"
 filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
@@ -256,14 +245,28 @@ def test_draw_smem_layout():
     """
     Display SMEM layout of CCLfile named 'filename'
     """
+
+    fig = plt.figure()
+    plt.style.use('seaborn')
+
+    ax_cluster1 = fig.add_subplot(211)
+    plt.title("Cluster 1")
+    plt.ylabel('SMEM addr')
+
+    ax_cluster2 = fig.add_subplot(212)
+    plt.title("Cluster 2")
+    plt.ylabel('SMEM addr')
+
+    ax_clusters = [ax_cluster1, ax_cluster2]
+
     nodes = ccl_file_parser(filename)
-    fig = draw_smem_map(nodes)
+    fig = draw_smem_map(nodes, fig, ax_clusters)
 
     # save with pickle
     plk.dump(fig, open('smem_fig.pickle', 'wb'))
 
 
-# test_draw_smem_layout()
+test_draw_smem_layout()
 
 
 def load_pickle():
@@ -274,96 +277,3 @@ def load_pickle():
 
 
 # load_pickle()
-
-
-def draw_stat(nodes):
-
-    fig = plt.figure()
-
-    # stats by cluster
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
-    ax = [ax1, ax2]
-
-    # list of events by cluster
-    events = [[], []]
-
-    # 1 - Create events list
-    for index in nodes:
-        node = nodes[index]
-
-        # create event
-        cluster = get_cluster(node.get('defining resource'))
-
-        if int(node.get('define', -1)) > 0:
-            events[cluster].append({
-                'date': int(node.get('define')),
-                'event': 'PE',
-                'value': 1})
-
-            events[cluster].append({
-                'date': int(node.get('end_define')),
-                'event': 'PE',
-                'value': -1})
-
-    # 2 - Create nb PEs curve
-    for events_by_cluster in events:
-
-        cluster = events.index(events_by_cluster)
-        sorted_events = sorted(events_by_cluster, key=lambda item: item['date'])
-
-        print(sorted_events)
-
-        #
-        nb_active_pes = 0
-        date = 0
-        previous_nb_active_pes = 0
-        previous_date = 0
-        x = list()
-        y = list()
-
-        for event in sorted_events:
-            date = event['date']
-
-            print("cluster:{}, time:{}, #PE:{}".format(
-                cluster, event['date'], nb_active_pes))
-
-            if (previous_date != date):
-                # added new point previously computed
-                print("plot {},{}, {},{}".format(
-                    previous_date, nb_active_pes,
-                    previous_date, previous_nb_active_pes,
-                ))
-                x.append(previous_date)
-                y.append(previous_nb_active_pes)
-                x.append(previous_date)
-                y.append(nb_active_pes)
-                previous_date = date
-                previous_nb_active_pes = nb_active_pes
-
-            # sum each event of the same date
-            nb_active_pes += event['value']
-            print("delta {},{}".format(date, nb_active_pes))
-
-        # add last point
-        x.append(date)
-        y.append(previous_nb_active_pes)
-        x.append(date)
-        y.append(nb_active_pes)
-
-        # plot cluster curve
-        ax[cluster].plot(
-            x, y,
-            linewidth=2, marker='o', c='black', markersize=2)
-
-        plt.show(block=False)
-
-
-def test_stat():
-    """
-    """
-    nodes = ccl_file_parser(filename)
-    return draw_stat(nodes)
-
-
-test_stat()
