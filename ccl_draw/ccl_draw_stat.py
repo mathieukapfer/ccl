@@ -16,7 +16,8 @@ def draw_stat(nodes, ax):
         # create event
         cluster = node.get('cluster')
 
-        if int(node.get('define', -1)) > 0:
+        if (int(node.get('define', -1)) > 0 and
+            int(node.get('define memory offset', -1)) > 0):
 
             # Handle super PE as 4 PE
             if node.get('defining resource')[0:3] == 'sPE':
@@ -36,7 +37,7 @@ def draw_stat(nodes, ax):
                 'event': 'PE',
                 'value': -delta})
 
-    # 2 - Create 'nb PEs' curve
+    # 2 - Create 'nb PEs' curve (integrate 'PE' event)
     for events_by_cluster in events:
 
         cluster = events.index(events_by_cluster)
@@ -88,7 +89,8 @@ def draw_stat(nodes, ax):
 
 
 # filename = "data/CCL_file_phase3.txt"
-filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
+filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
+# filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
@@ -116,4 +118,4 @@ def test_stat():
     plt.show(block=False)
 
 
-# test_stat()
+test_stat()
