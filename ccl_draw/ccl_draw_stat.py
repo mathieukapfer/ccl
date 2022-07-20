@@ -1,19 +1,25 @@
-import re
 
 import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
 
-def draw_stat(nodes, ax):
+def stat_create_events(nodes):
+    """
+    input:
+        nodes: dictionary of ccl file stream
+
+    return:
+        list of event by cluster:
+         - 'PE' event track PE usage change
+         - 'smem' event track smem usage change
+    """
 
     # list of events by cluster
     events = [[], []]
 
-    # 1 - Create events list
     for index in nodes:
         node = nodes[index]
 
-        # create event
         cluster = node.get('cluster')
 
         if (int(node.get('define', -1)) > 0 and
@@ -26,7 +32,7 @@ def draw_stat(nodes, ax):
                 delta = 1
             print(delta)
 
-            # Managed +/-
+            # Create PE usage event
             events[cluster].append({
                 'date': int(node.get('define')),
                 'event': 'PE',
@@ -37,55 +43,117 @@ def draw_stat(nodes, ax):
                 'event': 'PE',
                 'value': -delta})
 
-    # 2 - Create 'nb PEs' curve (integrate 'PE' event)
+            # Create 'smem used size' event
+            # - increase when stream is processing
+            delta = int(node.get('elementsize')) + int(node.get('internal memory'))
+            events[cluster].append({
+                'date': int(node.get('define')),
+                'event': 'smem',
+                'value': delta})
+
+            # - decrease when stream is moved outside cluster or no more observed
+            events[cluster].append({
+                'date': int(node.get('L2toDDR',
+                                     node.get('L2toL2',
+                                              node.get('observe_end'
+                                              )))),
+                'event': 'smem',
+                'value': -delta})
+
+    return events
+
+
+def stat_integrated_events(sorted_events, rate=1):
+    """
+    input:
+        sorted_event:  list of event sorted by date
+
+    return:
+        list of point (x,y) corresponding to the integration of events on date
+    """
+    # init
+    integrated_value = 0
+    date = 0
+    previous_integrated_value = 0
+    previous_date = 0
+    x = list()
+    y = list()
+
+    # integrate events
+    for event in sorted_events:
+        date = event['date']
+
+        print("time:{}, integrated value:{}".format(
+            event['date'], integrated_value))
+
+        if (previous_date != date):
+            # added new point previously computed
+            print("plot {},{}, {},{}".format(
+                previous_date, integrated_value,
+                previous_date, previous_integrated_value,
+            ))
+            # add rise or falling 'edge' points (same date)
+            x.append(previous_date)
+            y.append(previous_integrated_value/rate)
+            x.append(previous_date)
+            y.append(integrated_value/rate)
+            previous_date = date
+            previous_integrated_value = integrated_value
+
+        # sum each event of the same date
+        integrated_value += event['value']
+        print("delta {},{}".format(date, integrated_value))
+
+    # add last point
+    x.append(date)
+    y.append(previous_integrated_value/rate)
+    x.append(date)
+    y.append(integrated_value/rate)
+
+    return x, y
+
+
+def draw_stat_events(events, ax):
+
+    # Create 'nb PEs' curve
     for events_by_cluster in events:
 
+        # extract event by cluster and sorted by date
         cluster = events.index(events_by_cluster)
-        sorted_events = sorted(events_by_cluster, key=lambda item: item['date'])
+        sorted_cluster_events = sorted(events_by_cluster, key=lambda item: item['date'])
 
-        print(sorted_events)
+        print(sorted_cluster_events)
 
-        #
-        nb_active_pes = 0
-        date = 0
-        previous_nb_active_pes = 0
-        previous_date = 0
-        x = list()
-        y = list()
+        # define axis
+        ax2 = ax[cluster].twinx()
+        ax1 = ax[cluster]
 
-        for event in sorted_events:
-            date = event['date']
 
-            print("cluster:{}, time:{}, #PE:{}".format(
-                cluster, event['date'], nb_active_pes))
+        # draw PE usage
+        sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
+        x, y = stat_integrated_events(sorted_events)
+        # ax2 = ax[cluster]
+        ax2.plot(
+            x, y,
+            linewidth=1, marker='.', c='blue', markersize=0)
+        ax2.yaxis.label.set_color('blue')
+        ax2.set_ylabel("nb PE")
+        ax2.set_ylim([0, 16])
+        ax2.fill_between(x, y, 0, color='blue', alpha=.1)
 
-            if (previous_date != date):
-                # added new point previously computed
-                print("plot {},{}, {},{}".format(
-                    previous_date, nb_active_pes,
-                    previous_date, previous_nb_active_pes,
-                ))
-                x.append(previous_date)
-                y.append(previous_nb_active_pes)
-                x.append(previous_date)
-                y.append(nb_active_pes)
-                previous_date = date
-                previous_nb_active_pes = nb_active_pes
-
-            # sum each event of the same date
-            nb_active_pes += event['value']
-            print("delta {},{}".format(date, nb_active_pes))
-
-        # add last point
-        x.append(date)
-        y.append(previous_nb_active_pes)
-        x.append(date)
-        y.append(nb_active_pes)
+        # draw smem usage
+        sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
+        x, y = stat_integrated_events(sorted_events, 2*1024*1024/100)
 
         # plot cluster curve
-        ax[cluster].plot(
+        ax1.plot(
             x, y,
-            linewidth=1, marker='.', c='black', markersize=0)
+            linewidth=1, marker='.', c='green', markersize=0)
+        ax1.yaxis.label.set_color('green')
+        ax1.set_ylabel("% SMEM")
+        ax1.set_ylim([0, 100])
+        ax1.fill_between(x, y, 0, color='green', alpha=.3)
+
 
 
 # filename = "data/CCL_file_phase3.txt"
@@ -96,6 +164,12 @@ filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
+
+
+def draw_stat(nodes, ax):
+    events = stat_create_events(nodes)
+    print(events)
+    draw_stat_events(events, ax)
 
 
 def test_stat():
@@ -110,6 +184,7 @@ def test_stat():
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
+    print(nodes)
 
     # draw stat
     draw_stat(nodes, ax)
@@ -118,4 +193,4 @@ def test_stat():
     plt.show(block=False)
 
 
-test_stat()
+# test_stat()
