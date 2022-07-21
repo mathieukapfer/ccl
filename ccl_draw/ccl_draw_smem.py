@@ -34,7 +34,7 @@ def draw_arrow(fig, last_axes, axes_tail, axes_head, x1, y1, x2, y2, style):
                           xyB=(x2, y2), coordsB='data', axesB=axes_head,
                           connectionstyle=style['connectionstyle'],
                           arrowstyle=style['arrowstyle'],
-                          color=style['color']
+                          color=style['color'],
     )
     print('Arrow {},{}->{},{}'.format(x1, y1, x2, y2))
     last_axes.add_artist(con)
@@ -57,7 +57,7 @@ def arrow_style(node):
     elif int(node.get('L2toDDR', -1)) > 0:
         connectionstyle = "arc3,rad=0.3"
         arrowstyle = "->"
-        color = 'red'
+        color = 'maroon'
     return {
         'connectionstyle': connectionstyle,
         'arrowstyle': arrowstyle,

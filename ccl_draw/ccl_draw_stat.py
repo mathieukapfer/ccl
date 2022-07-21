@@ -114,6 +114,11 @@ def stat_integrated_events(sorted_events, rate=1):
 
 
 def draw_stat_events(events, ax):
+    """
+    Integrate events and display its
+    """
+
+    axis = list()
 
     # Create 'nb PEs' curve
     for events_by_cluster in events:
@@ -128,18 +133,20 @@ def draw_stat_events(events, ax):
         ax2 = ax[cluster].twinx()
         ax1 = ax[cluster]
 
-
         # draw PE usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
-        x, y = stat_integrated_events(sorted_events)
+        x, y = stat_integrated_events(sorted_events, 16/100)
         # ax2 = ax[cluster]
         ax2.plot(
             x, y,
             linewidth=1, marker='.', c='blue', markersize=0)
         ax2.yaxis.label.set_color('blue')
-        ax2.set_ylabel("nb PE")
-        ax2.set_ylim([0, 16])
+        ax2.set_ylabel("% nb PEs")
+        ax2.set_ylim([0, 100])
         ax2.fill_between(x, y, 0, color='blue', alpha=.1)
+        # ax2.spines['right'].set_color('blue')
+        [t.set_color('blue') for t in ax2.yaxis.get_ticklabels()]
+        # ax2.tick_params(axis='y', length=4.0)
 
         # draw smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
@@ -153,7 +160,12 @@ def draw_stat_events(events, ax):
         ax1.set_ylabel("% SMEM")
         ax1.set_ylim([0, 100])
         ax1.fill_between(x, y, 0, color='green', alpha=.3)
+        # ax1.spines['left'].set_color('green')
+        [t.set_color('green') for t in ax1.yaxis.get_ticklabels()]
 
+        axis.append([ax1, ax2])
+
+    return axis
 
 
 # filename = "data/CCL_file_phase3.txt"
@@ -169,7 +181,7 @@ filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
 def draw_stat(nodes, ax):
     events = stat_create_events(nodes)
     print(events)
-    draw_stat_events(events, ax)
+    return draw_stat_events(events, ax)
 
 
 def test_stat():

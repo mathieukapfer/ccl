@@ -13,11 +13,11 @@ def ccl_draw():
     # plt.style.use('classic')
 
     # define ratio
-    gs_kw = dict(width_ratios=[1], height_ratios=[5, 1, 5, 1])
+    gs_kw = dict(width_ratios=[1, 1], height_ratios=[5, 1], wspace=0.05)
 
     # create fig and axes
-    fig, axd = plt.subplot_mosaic([['cluster 1'], ['stat1'],
-                                   ['cluster 2'], ['stat2']],
+    fig, axd = plt.subplot_mosaic([['cluster 1', 'cluster 2'],
+                                   ['stat1', 'stat2']],
                                   gridspec_kw=gs_kw,
                                   #figsize=(5.5, 3.5),
                                   #constrained_layout=True
@@ -32,11 +32,26 @@ def ccl_draw():
     axd['cluster 2'].tick_params('x', labelbottom=False)
     axd['stat2'].get_shared_x_axes().join(axd['stat2'], axd['cluster 2'])
 
-    # add label
-    axd['cluster 1'].set_ylabel("cluster1\nSMEM addr")
-    axd['stat1'].set_ylabel("cluster1\nnb PEs")
-    axd['cluster 2'].set_ylabel("cluster2\nSMEM addr")
-    axd['stat2'].set_ylabel("cluster2\nnb PEs")
+    # same y limit for all cluster (SMEM)
+    axd['cluster 1'].set_ylim([0, 2*1024*1024])
+    axd['cluster 2'].set_ylim([0, 2*1024*1024])
+
+    # change axes zorder to not overload arrow inter axis [not working yet!]
+    axd['stat1'].set_axisbelow(True)
+    axd['cluster 1'].set_axisbelow(True)
+    axd['stat2'].set_axisbelow(True)
+    axd['cluster 2'].set_axisbelow(True)
+
+    # add axes label and title
+    axd['cluster 1'].set_title("cluster 1")
+    axd['cluster 2'].set_title("cluster 2")
+    axd['cluster 1'].set_ylabel("SMEM addr")
+    # - remove inner tick and label
+    axd['cluster 2'].tick_params('y', labelleft=False)
+
+    # axd['stat1'].set_ylabel("cluster1\nnb PEs")
+    # axd['cluster 2'].set_ylabel("cluster2\nSMEM addr")
+    # axd['stat2'].set_ylabel("cluster2\nnb PEs")
 
     # legend
     #plt.title("Timeline")
@@ -46,10 +61,17 @@ def ccl_draw():
     nodes = ccl_file_parser(filename)
 
     # draw statistic
-    draw_stat(nodes, [axd['stat1'], axd['stat2']])
+    axis = draw_stat(nodes, [axd['stat1'], axd['stat2']])
+    print("Stat Axis: {}".format(axis))
+    # remove inner y tick and label
+    axis[0][1].set_ylabel("")
+    axis[0][1].tick_params('y', labelright=False)
+    axis[1][0].set_ylabel("")
+    axis[1][0].tick_params('y', labelleft=False)
+    print("Stat Axis: {}".format(axis))
 
     # draw smem usage
-    draw_smem_map(nodes, fig, axd['cluster 1'],  # last axes (needed for arrow inter-axis)
+    draw_smem_map(nodes, fig, axd['cluster 2'],  # last axes (needed for arrow inter-axis)
                   [axd['cluster 1'], axd['cluster 2']])
 
     # display
