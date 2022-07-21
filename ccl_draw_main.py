@@ -79,8 +79,8 @@ def ccl_draw():
 
 
 # filename = "data/CCL_file_phase3.txt"
-filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
-# filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
+filename = "data/ToKalray12JUL22/CCL_file.txt"  # RX v2
+# filename = "data/ToKalray05JUL22/CCL_file.txt"  # RX working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'

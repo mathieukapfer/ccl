@@ -69,7 +69,7 @@ def stat_integrated_events(sorted_events, rate=1):
         sorted_event:  list of event sorted by date
 
     return:
-        list of point (x,y) corresponding to the integration of events on date
+        list of point (x,y) corresponding to the integration of events in time
     """
     # init
     integrated_value = 0
@@ -120,7 +120,7 @@ def draw_stat_events(events, ax):
 
     axis = list()
 
-    # Create 'nb PEs' curve
+    # By cluster
     for events_by_cluster in events:
 
         # extract event by cluster and sorted by date
@@ -179,6 +179,12 @@ filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
 
 
 def draw_stat(nodes, ax):
+    """
+    Produce statistic on data streams
+    input:
+       - nodes: data streams dictionary
+       - ax: list of axes to display statistics, one per cluster
+    """
     events = stat_create_events(nodes)
     print(events)
     return draw_stat_events(events, ax)
@@ -186,6 +192,7 @@ def draw_stat(nodes, ax):
 
 def test_stat():
     """
+    Unit test of 'draw_stat' function
     """
     fig = plt.figure()
 
@@ -205,4 +212,4 @@ def test_stat():
     plt.show(block=False)
 
 
-# test_stat()
+test_stat()
