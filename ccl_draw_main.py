@@ -71,13 +71,25 @@ def ccl_draw():
 
     # draw statistic
     axis = draw_stat(nodes, [axd['stat1'], axd['stat2'], axd['dma1'], axd['dma2']])
-    print("Stat Axis: {}".format(axis))
+
     # remove inner y tick and label
+    # - remove Stat right scale of cluster 0
     axis[0][1].set_ylabel("")
     axis[0][1].tick_params('y', labelright=False)
+
+    # - remove Stat left scale of cluster 1
     axis[1][0].set_ylabel("")
     axis[1][0].tick_params('y', labelleft=False)
-    print("Stat Axis: {}".format(axis))
+
+    # - remove DMA left scale of cluster 1
+    axis[1][2].set_ylabel("")
+    axis[1][2].tick_params('y', labelleft=False)
+
+    # same range for DMA event for all cluster
+    ymin = min(axis[0][2].get_ylim()[0], axis[1][2].get_ylim()[0])
+    ymax = max(axis[0][2].get_ylim()[1], axis[1][2].get_ylim()[1])
+    axis[0][2].set_ylim([ymin, ymax])
+    axis[1][2].set_ylim([ymin, ymax])
 
     # display
     plt.show(block=False)

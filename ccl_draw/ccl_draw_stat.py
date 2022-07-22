@@ -64,7 +64,6 @@ def stat_create_events(nodes):
                     delta = 4
                 else:
                     delta = 1
-                print(delta)
 
                 # Create PE usage event
                 events[cluster].append({
@@ -111,7 +110,7 @@ def stat_create_events(nodes):
                 # DDR -> L2
                 if int(node.get('DDRtoL2', -1)) >= 0:
                     clusters_obs = node.get('cluster_observes', [])
-                    for cluster_obs in clusters_obs:
+                    for cluster_obs in list(set(clusters_obs)):
                         new_events = create_dma_event(
                             date=int(node.get('DDRtoL2')),
                             event='DMA DDR',
@@ -128,7 +127,7 @@ def stat_create_events(nodes):
                     events[cluster].extend(new_events)
                     # L2 -> L2 (receive)
                     clusters_obs = node.get('cluster_observes', [])
-                    for cluster_obs in clusters_obs:
+                    for cluster_obs in list(set(clusters_obs)):
                         new_events = create_dma_event(
                             date=int(node.get('L2toL2')),
                             event='DMA SMEM',
@@ -216,7 +215,7 @@ def draw_stat_events(events, ax):
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
         x, y = stat_integrate_events_with_edge(sorted_events)
 
-        ax2.plot(x, y,linewidth=1, marker='.', c='blue', markersize=0)
+        ax2.plot(x, y, linewidth=1, marker='.', c='blue', markersize=0)
         ax2.yaxis.label.set_color('blue')
         ax2.set_ylabel("nb PEs")
         ax2.set_ylim([0, 16])
@@ -234,7 +233,6 @@ def draw_stat_events(events, ax):
         ax1.fill_between(x, y, 0, color='green', alpha=.3)
         [t.set_color('green') for t in ax1.yaxis.get_ticklabels()]
 
-
         # draw % DMA
         ax_dma = ax[cluster+2]
 
@@ -251,7 +249,7 @@ def draw_stat_events(events, ax):
         [t.set_color('red') for t in ax_dma.yaxis.get_ticklabels()]
 
         # return axis for final rendering
-        axis.append([ax1, ax2])
+        axis.append([ax1, ax2, ax_dma])
 
     return axis
 
@@ -274,7 +272,7 @@ def draw_stat(nodes, ax):
        - ax: list of axes to display statistics, one per cluster
     """
     events = stat_create_events(nodes)
-    print(events)
+    # print(events)
     return draw_stat_events(events, ax)
 
 
