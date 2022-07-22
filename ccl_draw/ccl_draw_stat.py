@@ -3,6 +3,38 @@ import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
 
+def create_dma_event(date, event, value):
+    """
+    Create dma event :
+    Input
+       - date: start of dma tx
+       - event: kind of dma tx (SMEM to SMEM, SMEM to DDR, DDR to SMEM)
+       - value: data size
+    Return
+       - two events for rising and falling edge of DMA bandwith usage
+    """
+    dma_event = list()
+
+    # Just count number of DMA tx
+    # Tx duration is alway 1 clock regardles data size - very roughly model
+
+    # delta = value
+    delta = 1
+
+    # TODO: re enable this code
+    if False and event == 'DMA DDR':
+        # adding SMEM load too
+        rising_event = {'date': date, 'event': 'DMA SMEM', 'value': delta}
+        falling_event = {'date': date+1, 'event': 'DMA SMEM', 'value': -1 * delta}
+        dma_event.extend([rising_event, falling_event])
+
+    rising_event = {'date': date, 'event': event, 'value': delta}
+    falling_event = {'date': date+1, 'event': event, 'value': -1 * delta}
+    dma_event.extend([rising_event, falling_event])
+
+    return dma_event
+
+
 def stat_create_events(nodes):
     """
     input:
@@ -22,54 +54,90 @@ def stat_create_events(nodes):
 
         cluster = node.get('cluster')
 
-        if (int(node.get('define', -1)) > 0 and
-            int(node.get('define memory offset', -1)) > 0):
+        if int(node.get('define', -1)) > 0:
 
-            # Handle super PE as 4 PE
-            if node.get('defining resource')[0:3] == 'sPE':
-                delta = 4
-            else:
-                delta = 1
-            print(delta)
+            # Create PE and SMEM usage event
+            if int(node.get('define memory offset', -1)) > 0:
 
-            # Create PE usage event
-            events[cluster].append({
-                'date': int(node.get('define')),
-                'event': 'PE',
-                'value': delta})
+                # Handle super PE as 4 PE
+                if node.get('defining resource')[0:3] == 'sPE':
+                    delta = 4
+                else:
+                    delta = 1
+                print(delta)
 
-            events[cluster].append({
-                'date': int(node.get('end_define')),
-                'event': 'PE',
-                'value': -delta})
+                # Create PE usage event
+                events[cluster].append({
+                    'date': int(node.get('define')),
+                    'event': 'PE',
+                    'value': delta})
 
-            # Create 'smem used size' event
-            # - increase when stream is processing
-            delta = int(node.get('elementsize')) + int(node.get('internal memory'))
-            events[cluster].append({
-                'date': int(node.get('define')),
-                'event': 'smem',
-                'value': delta})
+                events[cluster].append({
+                    'date': int(node.get('end_define')),
+                    'event': 'PE',
+                    'value': -delta})
 
-            # - decrease when stream is moved outside cluster or no more observed
-            events[cluster].append({
-                'date': int(node.get('L2toDDR',
-                                     node.get('L2toL2',
-                                              node.get('observe_end'
-                                              )))),
-                'event': 'smem',
-                'value': -delta})
+                # Create 'smem used size' event
+                # - increase when stream is processing
+                delta = int(node.get('elementsize')) + int(node.get('internal memory'))
+                events[cluster].append({
+                    'date': int(node.get('define')),
+                    'event': 'smem',
+                    'value': delta})
 
+                # - decrease when stream is moved outside cluster or no more observed
+                events[cluster].append({
+                    'date': int(node.get('L2toDDR',
+                                         node.get('L2toL2',
+                                                  node.get('observe_end'
+                                                  )))),
+                    'event': 'smem',
+                    'value': -delta})
+
+            # Create DMA events
+            HACK = True
+            if(HACK):
+                print(node)
+                # L2 -> DDR
+                if int(node.get('L2toDDR', -1)) >= 0:
+                    events[cluster].extend(create_dma_event(
+                        date=int(node.get('L2toDDR')),
+                        event='DMA DDR',
+                        # TODO: handle elementsize of broadcasted stream - same for all line below
+                        value=int(node.get('elementsize', -1))))
+                # DDR -> L2
+                if int(node.get('DDRtoL2', -1)) >= 0:
+                    clusters_obs = node.get('cluster_observes', [])
+                    for cluster_obs in clusters_obs:
+                        events[cluster_obs].extend(create_dma_event(
+                            date=int(node.get('DDRtoL2')),
+                            event='DMA DDR',
+                            value=int(node.get('elementsize', -1))))
+                if int(node.get('L2toL2', -1)) >= 0:
+                    # L2 -> L2 (send)
+                    events[cluster].extend(create_dma_event(
+                        date=int(node.get('L2toL2')),
+                        event='DMA SMEM',
+                        value=int(node.get('elementsize', -1))))
+                    # L2 -> L2 (receive)
+                    clusters_obs = node.get('cluster_observes', [])
+                    for cluster_obs in clusters_obs:
+                        events[cluster_obs].extend(create_dma_event(
+                            date=int(node.get('L2toL2')),
+                            event='DMA SMEM',
+                            value=int(node.get('elementsize', -1))))
     return events
 
 
-def stat_integrated_events(sorted_events, rate=1):
+def stat_integrate_events_with_edge(sorted_events, rate=1):
     """
     input:
         sorted_event:  list of event sorted by date
 
     return:
-        list of point (x,y) corresponding to the integration of events in time
+        list of point (x,y) corresponding to the integration of events in time:
+         - add event at the same date
+         - produce rising and falling edge
     """
     # init
     integrated_value = 0
@@ -133,36 +201,45 @@ def draw_stat_events(events, ax):
         ax2 = ax[cluster].twinx()
         ax1 = ax[cluster]
 
-        # draw PE usage
+        # draw % PE usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
-        x, y = stat_integrated_events(sorted_events, 16/100)
-        # ax2 = ax[cluster]
-        ax2.plot(
-            x, y,
-            linewidth=1, marker='.', c='blue', markersize=0)
+        x, y = stat_integrate_events_with_edge(sorted_events)
+
+        ax2.plot(x, y,linewidth=1, marker='.', c='blue', markersize=0)
         ax2.yaxis.label.set_color('blue')
-        ax2.set_ylabel("% nb PEs")
-        ax2.set_ylim([0, 100])
+        ax2.set_ylabel("nb PEs")
+        ax2.set_ylim([0, 16])
         ax2.fill_between(x, y, 0, color='blue', alpha=.1)
-        # ax2.spines['right'].set_color('blue')
         [t.set_color('blue') for t in ax2.yaxis.get_ticklabels()]
-        # ax2.tick_params(axis='y', length=4.0)
 
-        # draw smem usage
+        # draw % smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
-        x, y = stat_integrated_events(sorted_events, 2*1024*1024/100)
+        x, y = stat_integrate_events_with_edge(sorted_events, 2*1024*1024/100)
 
-        # plot cluster curve
-        ax1.plot(
-            x, y,
-            linewidth=1, marker='.', c='green', markersize=0)
+        ax1.plot(x, y, linewidth=1, marker='.', c='green', markersize=0)
         ax1.yaxis.label.set_color('green')
         ax1.set_ylabel("% SMEM")
         ax1.set_ylim([0, 100])
         ax1.fill_between(x, y, 0, color='green', alpha=.3)
-        # ax1.spines['left'].set_color('green')
         [t.set_color('green') for t in ax1.yaxis.get_ticklabels()]
 
+
+        # draw % DMA
+        ax_dma = ax[cluster+2]
+
+        sorted_events = [event for event in sorted_cluster_events if
+                         (event['event'] == 'DMA DDR' or event['event'] == 'DMA SMEM')]
+        print("DMA event - Cluster {}: {}".format(cluster, sorted_events))
+        x, y = stat_integrate_events_with_edge(sorted_events)
+
+        ax_dma.plot(x, y, linewidth=1, marker='.', c='red', markersize=0)
+        ax_dma.yaxis.label.set_color('red')
+        ax_dma.set_ylabel("DMA event")
+        # ax_dma.set_ylim([0, 100])
+        ax_dma.fill_between(x, y, 0, color='red', alpha=.3)
+        [t.set_color('red') for t in ax_dma.yaxis.get_ticklabels()]
+
+        # return axis for final rendering
         axis.append([ax1, ax2])
 
     return axis
@@ -197,9 +274,12 @@ def test_stat():
     fig = plt.figure()
 
     # stats by cluster
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
+    ax1 = fig.add_subplot(411)
+    ax2 = fig.add_subplot(412)
     ax = [ax1, ax2]
+    # ax3 = fig.add_subplot(413)
+    # ax4 = fig.add_subplot(414)
+    # ax = [ax1, ax2, ax3, ax4]
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
@@ -212,4 +292,4 @@ def test_stat():
     plt.show(block=False)
 
 
-test_stat()
+# test_stat()

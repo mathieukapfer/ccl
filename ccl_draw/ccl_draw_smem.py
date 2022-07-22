@@ -93,7 +93,7 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
         ax_def = ax_clusters[cluster_define]
 
         # log
-        print(node)
+        # print(node)
 
         # name = "{}({})".format(node.get('action'),node.get('id'))
         name_def = "{}({})".format(node.get('id'), node.get('phase-def'))
@@ -154,6 +154,9 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
         else:
             # no data mvt, observer(s) are in the same cluster as definer
             cluster_observes.append(cluster_define)
+        # save observer cluster in node for futur usage
+        node['cluster_observes'] = cluster_observes
+        print(node)
 
         # draw observers's items
         for cluster_observe in list(set(cluster_observes)):
