@@ -6,7 +6,7 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 def create_dma_event(date, event, value, isMaster):
     """
     Create dma events :
-    Input extract from CCL file:
+    Input: digest from CCL file:
        - date: start of dma tx
        - event: kind of dma tx (SMEM to SMEM, SMEM to DDR, DDR to SMEM)
        - value: data size
@@ -18,21 +18,33 @@ def create_dma_event(date, event, value, isMaster):
     """
     dma_event = list()
 
-    # delta = value
+    # DMA model
+    bus_througput = 16  # 16 B/cycle
+    sabm_clock_duration = 1300  #
 
-    # TODO: re enable this code
-    if False and event == 'DMA DDR':
-        # adding SMEM load too
-        rising_event = {'date': date, 'event': 'DMA SMEM', 'value': delta}
-        falling_event = {'date': date+1, 'event': 'DMA SMEM', 'value': -1 * delta}
+    # Compute bus load
+    delta_time = value / bus_througput / sabm_clock_duration
+    delta = 1  # means bus load is ON/OFF mode
+
+    if (event == "L2toL2" or event == "L2toDDR" or event == "DDRtoL2"):
+        rising_event = {'date': date, 'event': 'SMEM bus', 'value': delta}
+        falling_event = {'date': date + delta_time, 'event': 'SMEM bus', 'value': -1 * delta}
         dma_event.extend([rising_event, falling_event])
 
+    if (event == "L2toDDR" or event == "DDRtoL2"):
+        rising_event = {'date': date, 'event': 'DDR bus', 'value': delta}
+        falling_event = {'date': date + delta_time, 'event': 'DDR bus', 'value': -1 * delta}
+        dma_event.extend([rising_event, falling_event])
+
+
+    # Compute DMA master event
     if(isMaster):
-        # adding rising and falling edge for 'DMA event'
+        # adding rising and falling edge for 'DMA (master) event'
         delta = 1
         rising_event = {'date': date, 'event': 'DMA event', 'value': delta}
         falling_event = {'date': date+1, 'event': 'DMA event', 'value': -1 * delta}
         dma_event.extend([rising_event, falling_event])
+
 
     return dma_event
 
@@ -103,10 +115,10 @@ def stat_create_events(nodes):
                 if int(node.get('L2toDDR', -1)) >= 0:
                     new_events = create_dma_event(
                         date=int(node.get('L2toDDR')),
-                        event='DMA DDR',
+                        event='L2toDDR',
                         # TODO: handle elementsize of broadcasted stream
                         # TODO: same for all similar lines below
-                        value=int(node.get('elementsize', -1)),
+                        value=int(node.get('elementsize')),
                         isMaster=True)
                     print("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
@@ -116,8 +128,8 @@ def stat_create_events(nodes):
                     for cluster_obs in list(set(clusters_obs)):
                         new_events = create_dma_event(
                             date=int(node.get('DDRtoL2')),
-                            event='DMA DDR',
-                            value=int(node.get('elementsize', -1)),
+                            event='DDRtoL2',
+                            value=int(node.get('elementsize')),
                             isMaster=True)
                         print("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
@@ -125,8 +137,8 @@ def stat_create_events(nodes):
                     # L2 -> L2 (send)
                     new_events = create_dma_event(
                         date=int(node.get('L2toL2')),
-                        event='DMA SMEM',
-                        value=int(node.get('elementsize', -1)),
+                        event='L2toL2',
+                        value=int(node.get('elementsize')),
                         isMaster=False)
                     print("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
@@ -135,8 +147,8 @@ def stat_create_events(nodes):
                     for cluster_obs in list(set(clusters_obs)):
                         new_events = create_dma_event(
                             date=int(node.get('L2toL2')),
-                            event='DMA SMEM',
-                            value=int(node.get('elementsize', -1)),
+                            event='L2toL2',
+                            value=int(node.get('elementsize')),
                             isMaster=True)
                         print("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
@@ -239,20 +251,51 @@ def draw_stat_events(events, ax):
         ax1.fill_between(x, y, 0, color='green', alpha=.3)
         [t.set_color('green') for t in ax1.yaxis.get_ticklabels()]
 
-        # draw % DMA
+        # DMA
         ax_dma = ax[cluster+2]
 
+        # draw % SMEM Bus usage
+        sorted_events = [event for event in sorted_cluster_events if
+                         event['event'] == 'SMEM bus']
+        print("SMEM bus - Cluster {}: {}".format(cluster, sorted_events))
+        x, y = stat_integrate_events_with_edge(sorted_events)
+
+        color = 'darkorange'
+        ax_dma.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
+        # ax_dma.yaxis.label.set_color(color)
+        # ax_dma.set_ylabel("SMEM bus")
+        # ax_dma.set_ylim([0, 100])
+        ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
+        #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+
+        # draw % DDR Bus usage
+        # working well but remove for figure clarity
+        if False:
+            sorted_events = [event for event in sorted_cluster_events if
+                             event['event'] == 'DDR bus']
+            print("DDR bus - Cluster {}: {}".format(cluster, sorted_events))
+            x, y = stat_integrate_events_with_edge(sorted_events)
+
+            color = 'darkred'
+            ax_dma.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
+            # ax_dma.yaxis.label.set_color(color)
+            # ax_dma.set_ylabel("SMEM bus")
+            # ax_dma.set_ylim([0, 100])
+            ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
+            #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+
+        # draw % DMA event
         sorted_events = [event for event in sorted_cluster_events if
                          event['event'] == 'DMA event']
         print("DMA event - Cluster {}: {}".format(cluster, sorted_events))
         x, y = stat_integrate_events_with_edge(sorted_events)
-
-        ax_dma.plot(x, y, linewidth=1, marker='.', c='red', markersize=0)
-        ax_dma.yaxis.label.set_color('red')
-        ax_dma.set_ylabel("DMA event")
+        color = 'darkorange'
+        ax_dma.plot(x, y, '--', linewidth=1, c=color, markersize=0)
+        ax_dma.yaxis.label.set_color(color)
+        ax_dma.set_ylabel("DMA & buses")
         # ax_dma.set_ylim([0, 100])
-        ax_dma.fill_between(x, y, 0, color='red', alpha=.3)
-        [t.set_color('red') for t in ax_dma.yaxis.get_ticklabels()]
+        ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
+        [t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
 
         # return axis for final rendering
         axis.append([ax1, ax2, ax_dma])
@@ -307,4 +350,4 @@ def test_stat():
     plt.show(block=False)
 
 
-# test_stat()
+#test_stat()
