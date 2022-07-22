@@ -260,7 +260,7 @@ def draw_stat_events(events, ax):
         print("SMEM bus - Cluster {}: {}".format(cluster, sorted_events))
         x, y = stat_integrate_events_with_edge(sorted_events)
 
-        color = 'darkorange'
+        color = 'orange'
         ax_dma.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
         # ax_dma.yaxis.label.set_color(color)
         # ax_dma.set_ylabel("SMEM bus")
@@ -292,10 +292,10 @@ def draw_stat_events(events, ax):
         color = 'darkorange'
         ax_dma.plot(x, y, '--', linewidth=1, c=color, markersize=0)
         ax_dma.yaxis.label.set_color(color)
-        ax_dma.set_ylabel("DMA & buses")
+        ax_dma.set_ylabel("DMA event\n& buses")
         # ax_dma.set_ylim([0, 100])
-        ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
-        [t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+        #ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
+        #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
 
         # return axis for final rendering
         axis.append([ax1, ax2, ax_dma])
@@ -350,4 +350,4 @@ def test_stat():
     plt.show(block=False)
 
 
-#test_stat()
+test_stat()
