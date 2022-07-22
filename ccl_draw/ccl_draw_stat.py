@@ -3,23 +3,22 @@ import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
 
-def create_dma_event(date, event, value):
+def create_dma_event(date, event, value, isMaster):
     """
-    Create dma event :
-    Input
+    Create dma events :
+    Input extract from CCL file:
        - date: start of dma tx
        - event: kind of dma tx (SMEM to SMEM, SMEM to DDR, DDR to SMEM)
        - value: data size
+       - isMaster: DMA event shoudl be increment
     Return
-       - two events for rising and falling edge of DMA bandwith usage
+       - two events for rising and falling edge for
+           - DMA event (for master)
+           - DMA bandwith usage: TODO
     """
     dma_event = list()
 
-    # Just count number of DMA tx
-    # Tx duration is alway 1 clock regardles data size - very roughly model
-
     # delta = value
-    delta = 1
 
     # TODO: re enable this code
     if False and event == 'DMA DDR':
@@ -28,9 +27,12 @@ def create_dma_event(date, event, value):
         falling_event = {'date': date+1, 'event': 'DMA SMEM', 'value': -1 * delta}
         dma_event.extend([rising_event, falling_event])
 
-    rising_event = {'date': date, 'event': event, 'value': delta}
-    falling_event = {'date': date+1, 'event': event, 'value': -1 * delta}
-    dma_event.extend([rising_event, falling_event])
+    if(isMaster):
+        # adding rising and falling edge for 'DMA event'
+        delta = 1
+        rising_event = {'date': date, 'event': 'DMA event', 'value': delta}
+        falling_event = {'date': date+1, 'event': 'DMA event', 'value': -1 * delta}
+        dma_event.extend([rising_event, falling_event])
 
     return dma_event
 
@@ -104,7 +106,8 @@ def stat_create_events(nodes):
                         event='DMA DDR',
                         # TODO: handle elementsize of broadcasted stream
                         # TODO: same for all similar lines below
-                        value=int(node.get('elementsize', -1)))
+                        value=int(node.get('elementsize', -1)),
+                        isMaster=True)
                     print("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
                 # DDR -> L2
@@ -114,7 +117,8 @@ def stat_create_events(nodes):
                         new_events = create_dma_event(
                             date=int(node.get('DDRtoL2')),
                             event='DMA DDR',
-                            value=int(node.get('elementsize', -1)))
+                            value=int(node.get('elementsize', -1)),
+                            isMaster=True)
                         print("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
                 if int(node.get('L2toL2', -1)) >= 0:
@@ -122,7 +126,8 @@ def stat_create_events(nodes):
                     new_events = create_dma_event(
                         date=int(node.get('L2toL2')),
                         event='DMA SMEM',
-                        value=int(node.get('elementsize', -1)))
+                        value=int(node.get('elementsize', -1)),
+                        isMaster=False)
                     print("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
                     # L2 -> L2 (receive)
@@ -131,7 +136,8 @@ def stat_create_events(nodes):
                         new_events = create_dma_event(
                             date=int(node.get('L2toL2')),
                             event='DMA SMEM',
-                            value=int(node.get('elementsize', -1)))
+                            value=int(node.get('elementsize', -1)),
+                            isMaster=True)
                         print("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
 
@@ -237,7 +243,7 @@ def draw_stat_events(events, ax):
         ax_dma = ax[cluster+2]
 
         sorted_events = [event for event in sorted_cluster_events if
-                         (event['event'] == 'DMA DDR' or event['event'] == 'DMA SMEM')]
+                         event['event'] == 'DMA event']
         print("DMA event - Cluster {}: {}".format(cluster, sorted_events))
         x, y = stat_integrate_events_with_edge(sorted_events)
 
