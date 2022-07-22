@@ -54,10 +54,10 @@ def stat_create_events(nodes):
 
         cluster = node.get('cluster')
 
-        if int(node.get('define', -1)) > 0:
+        if int(node.get('define', -1)) >= 0:
 
             # Create PE and SMEM usage event
-            if int(node.get('define memory offset', -1)) > 0:
+            if int(node.get('define memory offset', -1)) >= 0:
 
                 # Handle super PE as 4 PE
                 if node.get('defining resource')[0:3] == 'sPE':
@@ -97,35 +97,46 @@ def stat_create_events(nodes):
             # Create DMA events
             HACK = True
             if(HACK):
-                print(node)
+                print("DMA processing of: {}".format(node))
                 # L2 -> DDR
                 if int(node.get('L2toDDR', -1)) >= 0:
-                    events[cluster].extend(create_dma_event(
+                    new_events = create_dma_event(
                         date=int(node.get('L2toDDR')),
                         event='DMA DDR',
-                        # TODO: handle elementsize of broadcasted stream - same for all line below
-                        value=int(node.get('elementsize', -1))))
+                        # TODO: handle elementsize of broadcasted stream
+                        # TODO: same for all similar lines below
+                        value=int(node.get('elementsize', -1)))
+                    print("DMA:cluster{}:{}".format(cluster, new_events))
+                    events[cluster].extend(new_events)
                 # DDR -> L2
                 if int(node.get('DDRtoL2', -1)) >= 0:
                     clusters_obs = node.get('cluster_observes', [])
                     for cluster_obs in clusters_obs:
-                        events[cluster_obs].extend(create_dma_event(
+                        new_events = create_dma_event(
                             date=int(node.get('DDRtoL2')),
                             event='DMA DDR',
-                            value=int(node.get('elementsize', -1))))
+                            value=int(node.get('elementsize', -1)))
+                        print("DMA:cluster{}:{}".format(cluster_obs, new_events))
+                        events[cluster_obs].extend(new_events)
                 if int(node.get('L2toL2', -1)) >= 0:
                     # L2 -> L2 (send)
-                    events[cluster].extend(create_dma_event(
+                    new_events = create_dma_event(
                         date=int(node.get('L2toL2')),
                         event='DMA SMEM',
-                        value=int(node.get('elementsize', -1))))
+                        value=int(node.get('elementsize', -1)))
+                    print("DMA:cluster{}:{}".format(cluster, new_events))
+                    events[cluster].extend(new_events)
                     # L2 -> L2 (receive)
                     clusters_obs = node.get('cluster_observes', [])
                     for cluster_obs in clusters_obs:
-                        events[cluster_obs].extend(create_dma_event(
+                        new_events = create_dma_event(
                             date=int(node.get('L2toL2')),
                             event='DMA SMEM',
-                            value=int(node.get('elementsize', -1))))
+                            value=int(node.get('elementsize', -1)))
+                        print("DMA:cluster{}:{}".format(cluster_obs, new_events))
+                        events[cluster_obs].extend(new_events)
+
+
     return events
 
 
@@ -276,10 +287,10 @@ def test_stat():
     # stats by cluster
     ax1 = fig.add_subplot(411)
     ax2 = fig.add_subplot(412)
-    ax = [ax1, ax2]
-    # ax3 = fig.add_subplot(413)
-    # ax4 = fig.add_subplot(414)
-    # ax = [ax1, ax2, ax3, ax4]
+    # ax = [ax1, ax2]
+    ax3 = fig.add_subplot(413)
+    ax4 = fig.add_subplot(414)
+    ax = [ax1, ax2, ax3, ax4]
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
