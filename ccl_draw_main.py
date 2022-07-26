@@ -72,7 +72,7 @@ def ccl_draw():
         # same y limit for all cluster (SMEM)
         axd[smem].set_ylim([0, 2*1024*1024])
 
-        # change axes zorder to not overload arrow inter axis [not working yet!]
+        # change axes zorder to not overlap the arrows [not working yet!]
         axd[smem].set_axisbelow(True)
         axd[stat].set_axisbelow(True)
         axd[dma].set_axisbelow(True)
@@ -91,7 +91,7 @@ def ccl_draw():
 
     # draw smem usage
     draw_smem_map(nodes, fig,
-                  axd['cluster {}'.format(max_cluster)],  # last axes carry the arrows
+                  axd['cluster {}'.format(max_cluster-1)],  # last axes carry the arrows
                   smem_axis  # smem figures
                   # [axd['cluster 1'], axd['cluster 2']]
     )
@@ -136,7 +136,7 @@ filename = "data/CCL_file_phase3.txt"
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-filename = 'data/CCL_file_test_smem_svg.txt'
+# filename = 'data/CCL_file_test_smem_svg.txt'
 
 
 ccl_draw()

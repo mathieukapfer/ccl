@@ -226,13 +226,13 @@ def get_broadcast_source(nodes, node):
 
 
 # filename = "data/CCL_file_phase3.txt"
-filename = "data/ToKalray12JUL22/CCL_file.txt"  # Rx + Tx
+# filename = "data/ToKalray12JUL22/CCL_file.txt"  # Rx + Tx
 # filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-# filename = 'data/CCL_file_test_smem_svg.txt'
+filename = 'data/CCL_file_test_smem_svg.txt'
 
 
 def test_draw_smem_layout():
@@ -240,21 +240,30 @@ def test_draw_smem_layout():
     Display SMEM layout of CCLfile named 'filename'
     """
 
+    # parse file
+    nodes = ccl_file_parser(filename)
+
+    # create fig
     fig = plt.figure()
     plt.style.use('seaborn')
 
-    ax_cluster1 = fig.add_subplot(211)
-    plt.title("Cluster 1")
-    plt.ylabel('SMEM addr')
+    # check nb clusters
+    max_cluster = 0
+    for node_index in nodes:
+        node = nodes[node_index]
+        if node['cluster'] > max_cluster:
+            max_cluster = node['cluster']
 
-    ax_cluster2 = fig.add_subplot(212)
-    plt.title("Cluster 2")
-    plt.ylabel('SMEM addr')
+    print("max cluster: {}".format(max_cluster))
 
-    ax_clusters = [ax_cluster1, ax_cluster2]
+    # stats by cluster
+    ax_clusters = list()
+    for cluster in range(0, max_cluster + 1):
+        ax_clusters.append(fig.add_subplot(1, max_cluster+1, cluster+1))
+        plt.title("Cluster {}".format(cluster))
+        plt.ylabel('SMEM addr')
 
-    nodes = ccl_file_parser(filename)
-    fig = draw_smem_map(nodes, fig, ax_cluster2, ax_clusters)
+    fig = draw_smem_map(nodes, fig, ax_clusters[max_cluster], ax_clusters)
 
     # show
     plt.show(block=False)

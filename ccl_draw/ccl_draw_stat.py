@@ -226,6 +226,7 @@ def draw_stat_events(events, stat_axis, dma_axis):
         print(sorted_cluster_events)
 
         # define axis
+        print("cluster={}".format(cluster))
         ax_stat_pe = stat_axis[cluster].twinx()
         ax_stat_smem = stat_axis[cluster]
 
@@ -333,30 +334,40 @@ def test_stat():
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
-    print(nodes)
+    # print(nodes)
+
+    # check nb clusters
+    max_cluster = 0
+    for node_index in nodes:
+        node = nodes[node_index]
+        if node['cluster'] > max_cluster:
+            max_cluster = node['cluster']
+
+    print("max cluster: {}".format(max_cluster))
 
     # stats by cluster
     stat_axis = list()
-    stat_axis.append(fig.add_subplot(321))
-    stat_axis.append(fig.add_subplot(323))
-    stat_axis.append(fig.add_subplot(325))
-
-    # dma by cluster
     dma_axis = list()
-    dma_axis.append(fig.add_subplot(322))
-    dma_axis.append(fig.add_subplot(324))
-    dma_axis.append(fig.add_subplot(326))
-
-    # parse ccl file
-    nodes = ccl_file_parser(filename)
-    print(nodes)
+    for cluster in range(0, max_cluster + 1):
+        print("{}{}{}".format(
+            2, max_cluster + 1, 1 + cluster)
+        )
+        stat_axis.append(fig.add_subplot(
+            2, max_cluster + 1, 1 + cluster)
+        )
+        print("{}{}{}".format(
+            2, max_cluster + 1, max_cluster + 2 + cluster)
+        )
+        dma_axis.append(fig.add_subplot(
+            2, max_cluster + 1, max_cluster + 2 + cluster)
+        )
 
     # draw stat
-    print(stat_axis)
-    draw_stat(nodes, 3, stat_axis, dma_axis)
+    print("stat_axis: {}".format(stat_axis))
+    draw_stat(nodes, max_cluster, stat_axis, dma_axis)
 
     # show
     plt.show(block=False)
 
 
-test_stat()
+# test_stat()
