@@ -1,0 +1,44 @@
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %*******************************************************************************************
+    %Includes
+    include "..\NR_PDSCH_COMMON\nrPDSCH_defines.rdsl"
+    include "..\NR_PDSCH_DLSCH\nrDLSCH_Blp.rdsl"
+    %*******************************************************************************************
+    % Extern functions
+
+    extern getUserBLPInfoTX_cfunc(out[])
+    extern getDlUETBlk_cfunc(out[])
+
+    %*******************************************************************************************
+    %PDSCH Top Level Flow
+    %*******************************************************************************************
+    flow pdsch_tx_flow
+    %"Begin of Stream definitions"
+
+    %Output: scrambled transport block       
+    scrambled_tblk                          :   stream[MAX_NUM_DL_UE]
+
+    %Internal Streams Definitions
+    downlinkUETBlk_Slot                     :   stream[MAX_NUM_DL_UE]
+    downlinkUEInfo_Slot                     :   stream[MAX_NUM_DL_UE]
+    
+    
+    getUserBLPInfoTX(downlinkUEInfo_Slot)
+    
+    getDlUETBlk(downlinkUETBlk_Slot)
+
+    pdsch_bit_level_processing_per_ue {i = 1:MAX_NUM_DL_UE,
+                                       tblk = downlinkUETBlk_Slot[i],
+                                       blp_info_per_ue = downlinkUEInfo_Slot[i],
+                                       scrambled_tblk_per_ue = scrambled_tblk[i]}
+
+    modifier   getUserBLPInfoTX(out downlinkUEInfo_Slot[])
+               getUserBLPInfoTX_cfunc(downlinkUEInfo_Slot)
+
+    modifier   getDlUETBlk(out downlinkUETBlk_Slot[])
+               getDlUETBlk_cfunc(downlinkUETBlk_Slot)
+
+    %*******************************************************************************************
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    

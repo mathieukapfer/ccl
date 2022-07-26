@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDSL_Platform_discovery source="Ringo">
+
+  <!--A pattern has a name and the following groups
+      other patterns it cannot define at the same time as
+      other patterns it shares L2 level memory with
+      patterns it can use for observation when it it being defined-->
+
+  <!-- patterns included are
+       #pe and sPE observed in their originating clusters
+       big_delay.DDR.L2.pe0_0.cl0
+       big delay.DDR.L2.pe1_0.cl0
+       pipeline.L2.pe0_0.cl0
+       pipeline.L2.pe1_0.cl0
+       pipeline.L2.sPE0_1.cl1
+       #a pe in cluster 0 observed in cluster 1
+       big_delay.DDR.L2.pe0_0.cl1
+       big delay.DDR.L2.pe1_0.cl1
+       #an sPE in cluster 1 observed in cluster 0
+       big_delay.DDR.L2.sPE0_1.cl0
+       
+       "inward" is always towards the CPU
+  -->
+
+  <all_patterns>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+  </all_patterns>
+
+  <pattern name="L2toL2.pe0_0.cl1">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster1</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>L2toL2.pe0_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delayDDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="L2toL2.pe1_0.cl1">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster1</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delayDDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="L2toL2.sPE0_1.cl0">
+    <defining_memory>L2.cluster1</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>L2toL2.sPE0_1.cl0</member>      
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </can_observe>
+  </pattern>
+  
+  <pattern name="big_delay.DDR.L2.pe0_0.cl0">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>L2toL2.pe0_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>     
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+    
+  <pattern name="pipeline.L2.pe0_0.cl0">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>L2toL2.pe0_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+  
+  <pattern name="big_delay.DDR.L2.pe1_0.cl0">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>     
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+  
+  <pattern name="pipeline.L2.pe1_0.cl0">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="pipeline.L2.sPE0_1.cl1">
+    <defining_memory>L2.cluster1</defining_memory>
+    <observing_memory>L2.cluster1</observing_memory>
+    <exclusive_define_with>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="big_delay.DDR.L2.pe0_0.cl1">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster1</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>L2toL2.pe0_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>      
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="big_delay.DDR.L2.pe1_0.cl1">
+    <defining_memory>L2.cluster0</defining_memory>
+    <observing_memory>L2.cluster1</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>      
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+      <member>big_delayDDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.pe0_0.cl0</member>
+      <member>pipeline.L2.pe1_0.cl0</member>
+      <member>L2toL2.sPE0_1.cl0</member>
+    </can_observe>
+  </pattern>
+
+  <pattern name="big_delay.DDR.L2.sPE0_1.cl0">
+    <defining_memory>L2.cluster1</defining_memory>
+    <observing_memory>L2.cluster0</observing_memory>
+    <exclusive_define_with>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.sPE0_1.cl0</member>      
+    </exclusive_define_with>
+    <shares_L2_II_with>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+    </shares_L2_II_with>
+    <shares_L2_IO_with>
+      <member>big_delay.DDR.L2.pe0_0.cl0</member>
+      <member>big_delay.DDR.L2.pe1_0.cl0</member>
+    </shares_L2_IO_with>
+    <shares_L2_OI_with>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    </shares_L2_OI_with>
+    <shares_L2_OO_with>
+      <member>big_delay.DDR.L2.sPE0_1.cl0</member>      
+    </shares_L2_OO_with>
+    <can_observe>
+      <member>big_delay.DDR.L2.pe0_0.cl1</member>
+      <member>big_delay.DDR.L2.pe1_0.cl1</member>
+      <member>pipeline.L2.sPE0_1.cl1</member>
+      <member>L2toL2.pe0_0.cl1</member>
+      <member>L2toL2.pe1_0.cl1</member>
+    </can_observe>
+  </pattern>
+
+
+  <!--Pattern groups add a label to a pattern type
+  and group all patterns of that type-->
+    
+  <pattern_group name="big fast delay type">
+    <member>big_delay.DDR.L2.pe0_0.cl0</member>
+    <member>big_delay.DDR.L2.pe1_0.cl0</member>
+    <member>big_delay.DDR.L2.pe0_0.cl1</member>
+    <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+  </pattern_group>
+
+  <pattern_group name ="pipeline type">
+    <member>pipeline.L2.pe0_0.cl0</member>
+    <member>pipeline.L2.pe1_0.cl0</member>
+    <member>pipeline.L2.sPE0_1.cl1</member>
+  </pattern_group>
+
+  <pattern_group name ="L2toL2 type">
+    <member>L2toL2.sPE0_1.cl0</member>
+    <member>L2toL2.pe0_0.cl1</member>
+    <member>L2toL2.pe1_0.cl1</member>
+  </pattern_group>
+  
+  <!-- Define the resources used
+       for define and observe of each pattern.
+       Each entry has a resource name as
+       different patterns can have multiple resources
+       So we can extend to arbitary resource type
+  -->
+  
+  <defining_resource name="pe0_0">
+    <usedby>big_delay.DDR.L2.pe0_0.cl0</usedby>
+    <usedby>big_delay.DDR.L2.pe0_0.cl1</usedby>
+    <usedby>pipeline.L2.pe0_0.cl0</usedby>
+    <usedby>L2toL2.pe0_0.cl1</usedby>
+  </defining_resource>
+
+  <defining_resource name="pe1_0">
+    <usedby>big_delay.DDR.L2.pe1_0.cl0</usedby>
+    <usedby>big_delay.DDR.L2.pe1_0.cl1</usedby>
+    <usedby>pipeline.L2.pe1_0.cl0</usedby>
+    <usedby>L2toL2.pe1_0.cl1</usedby>
+  </defining_resource>
+
+  <defining_resource name="sPE0_1">
+    <usedby>pipeline.L2.sPE0_1.cl1</usedby>
+    <usedby>big_delay.DDR.L2.sPE0_1.cl0</usedby>
+    <usedby>L2toL2.sPE0_1.cl0</usedby>
+  </defining_resource>
+
+  <observing_resource name="cl0">
+    <usedby>big_delay.DDR.L2.pe0_0.cl0</usedby>
+    <usedby>big_delay.DDR.L2.pe1_0.cl0</usedby>
+    <usedby>pipeline.L2.pe1_0.cl0</usedby>
+    <usedby>pipeline.L2.pe0_0.cl0</usedby>
+    <usedby>big_delay.DDR.L2.sPE0_1.cl0</usedby>
+    <usedby>L2toL2.sPE0_1.cl0</usedby>
+  </observing_resource>
+
+  <observing_resource name="cl1">
+    <usedby>big_delay.DDR.L2.pe0_0.cl1</usedby>
+    <usedby>big_delay.DDR.L2.pe1_0.cl1</usedby>
+    <usedby>L2toL2.pe0_0.cl1</usedby>
+    <usedby>L2toL2.pe1_0.cl1</usedby>
+    <usedby>pipeline.L2.sPE0_1.cl1</usedby>
+  </observing_resource>
+  
+  <!--Define which patterns can cross phase boundaries -->
+  <phase_crossing_patterns>
+    <member>big_delay.DDR.L2.pe0_0.cl0</member>
+    <member>big_delay.DDR.L2.pr1_0.cl0</member>
+    <member>big_delay.DDR.L2.pe0_0.cl1</member>
+    <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+  </phase_crossing_patterns>
+  
+  <!--Memory groups add a label to every memory
+  and group all patterns that use that memory
+  for overflow testing-->
+
+  <memory_group name="L2.cluster0">
+    <size>4194304</size>
+    <type>L2</type>
+    <member>big_delay.DDR.L2.pe0_0.cl0</member>
+    <member>big_delay.DDR.L2.pe1_0.cl0</member>
+    <member>pipeline.L2.pe0_0.cl0</member>
+    <member>pipeline.L2.pe1_0.cl0</member>
+    <member>big_delay.DDR.L2.pe0_0.cl1</member>
+    <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    <member>L2toL2.sPE0_1.cl0</member>
+    <member>L2toL2.pe0_0.cl1</member>
+    <member>L2toL2.pe1_0.cl1</member>
+  </memory_group>
+
+  <memory_group name="L2.cluster1">
+    <size>4194304</size>
+    <type>L2</type>
+    <member>big_delay.DDR.L2.pe0_0.cl1</member>
+    <member>big_delay.DDR.L2.pe1_0.cl1</member>
+    <member>big_delay.DDR.L2.sPE0_1.cl0</member>
+    <member>pipeline.L2.sPE0_1.cl1</member>
+    <member>L2toL2.sPE0_1.cl0</member>
+    <member>L2toL2.pe0_0.cl1</member>
+    <member>L2toL2.pe1_0.cl1</member>
+  </memory_group>
+
+
+</RDSL_Platform_discovery>
+
+  

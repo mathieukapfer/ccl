@@ -1,0 +1,149 @@
+﻿<RDSL_envelope_discovery>
+  
+
+  <extern name="getDlUETBlk_cfunc">
+    <runtime>128</runtime>
+    <elementsize>256</elementsize>
+    <internalsize>1000</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+    
+  <extern name="getUserBLPInfoTX_cfunc">
+    <runtime>1000</runtime>
+    <elementsize>256</elementsize>
+    <internalsize>500</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="rate_match_cfunc">
+    <runtime>240000</runtime>
+    <elementsize>137088</elementsize>
+    <internalsize>26112</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="ldpc_encoder_cfunc">
+    <runtime>2000000</runtime>
+    <elementsize>26112</elementsize>
+    <internalsize>50400</internalsize>
+    <patterns_available> 
+      <pattern>pipeline.L2.sPE0_1.cl1</pattern>
+      <pattern>big_delay.DDR.L2.sPE0_1.cl0</pattern>
+      <pattern>L2toL2.sPE0_1.cl0</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="scrambling_cfunc">
+    <runtime>40000</runtime>
+    <elementsize>137088</elementsize>
+    <internalsize>1500</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="extract_cblk_info_cfunc">
+    <runtime>2000</runtime>
+    <elementsize>256</elementsize>
+    <internalsize>200</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="cblk_tblk_demux_cfunc">
+    <runtime>30000</runtime>
+    <elementsize>137088</elementsize>
+    <internalsize>3500</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  
+  <extern name="tblk_cblk_mux_cfunc">
+    <runtime>50000</runtime>
+    <elementsize>68544</elementsize>
+    <internalsize>3500</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+  <extern name="tblkcrc_generate_encode_cfunc">
+    <runtime>50000</runtime>
+    <elementsize>3264</elementsize>
+    <internalsize>600</internalsize>
+    <patterns_available>
+      <pattern>big_delay.DDR.L2.pe0_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl0</pattern>
+      <pattern>big_delay.DDR.L2.pe0_0.cl1</pattern>
+      <pattern>big_delay.DDR.L2.pe1_0.cl1</pattern>
+      <pattern>pipeline.L2.pe0_0.cl0</pattern>
+      <pattern>pipeline.L2.pe1_0.cl0</pattern>
+      <pattern>L2toL2.pe0_0.cl1</pattern>
+      <pattern>L2toL2.pe1_0.cl1</pattern>
+    </patterns_available>
+  </extern>
+
+  <!-- keeping latency = modem period forces a single
+       phase solution constrained to that latency -->
+  <number_of_clusters>1</number_of_clusters>
+  <grid_period>1300</grid_period>
+  
+  <maximum_latency>19240000</maximum_latency> <!-- was 1950000 and 26000000 -->
+  <modem_period>9620000</modem_period>
+</RDSL_envelope_discovery>

@@ -1,0 +1,108 @@
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %*******************************************************************************************
+          % Extern functions
+
+          extern extract_cblk_info_cfunc(in, out)
+          extern tblkcrc_generate_encode_cfunc(in1, in2, out)
+          extern tblk_cblk_mux_cfunc(in1, in2, out[])
+          extern ldpc_encoder_cfunc(in1, in2, in3, out)
+          extern rate_match_cfunc(in1, in2, in3, out)
+          extern cblk_tblk_demux_cfunc(in1, in2, out)
+          extern scrambling_cfunc(in1, in2, out)
+
+        %*******************************************************************************************
+        % LDPC encode flow 
+        %*******************************************************************************************
+          flow encode_per_cblk(i)
+               bits_cblk                       :       stream{type = in}
+               cblk_info_in                    :       stream{type = in}
+               encoded_bits_cblk_out           :       stream{type = out}
+
+               ldpc_encoder(i, bits_cblk, cblk_info_in, encoded_bits_cblk_out)
+
+
+          modifier ldpc_encoder(in i, in bits_cblk, in cblk_info_in, out encoded_bits_cblk_out)
+                   ldpc_encoder_cfunc(i, bits_cblk, cblk_info_in, encoded_bits_cblk_out)
+
+          
+        %*******************************************************************************************
+        % Rate Match per CodeBlock flow                  
+        %*******************************************************************************************
+          flow rateMatch_per_cblk(i)
+               cblk_in                         :       stream{type = in}
+               cblk_info_in                    :       stream{type = in}
+               rate_matched_cblk_out           :       stream{type = out}
+
+               rate_match(i, cblk_in, cblk_info_in, rate_matched_cblk_out)
+
+
+
+          modifier rate_match(in i, in cblk_in, in cblk_info_in, out rate_matched_cblk_out)
+                   rate_match_cfunc(i, cblk_in, cblk_info_in, rate_matched_cblk_out) 
+
+        %*******************************************************************************************
+        %Per UE Bit Level Processing flow
+        %This flow implements extracting CodeBlock information, transport block CRC attachment,
+        %CodeBlock segmentation, control actions for channel coding and rate matching, CodeBlock
+        %concatenation, and scrambling.
+        %*******************************************************************************************
+          flow pdsch_bit_level_processing_per_ue
+                tblk:                                   stream{type = in}
+                blp_info_per_ue:                        stream{type = in}
+                scrambled_tblk_per_ue:                  stream{type = out}
+
+                %Internal Streams Definitions
+                cblk_info:                              stream
+                tblk_crc:                               stream
+                cblks:                                  stream[MAX_NUM_DL_CBLK]
+                encoded_bits_cblk:                      stream[MAX_NUM_DL_CBLK]
+                rate_matched_output:                    stream[MAX_NUM_DL_CBLK]
+                encoded_tblk:                           stream
+
+
+                extract_cblk_info(blp_info_per_ue, cblk_info)
+
+                tblkcrc_generate_encode(tblk, blp_info_per_ue, tblk_crc)
+
+                tblk_cblk_mux(tblk_crc, cblk_info, cblks)
+
+                encode_per_cblk {i = 1:MAX_NUM_DL_CBLK,
+                                 bits_cblk = cblks[i],
+                                 cblk_info_in = cblk_info,
+                                 encoded_bits_cblk_out = encoded_bits_cblk[i]}
+
+                
+                rateMatch_per_cblk {i =1:MAX_NUM_DL_CBLK,
+                                    cblk_in = encoded_bits_cblk[i],
+                                    cblk_info_in = cblk_info,
+                                    rate_matched_cblk_out = rate_matched_output[i]}
+
+                cblk_tblk_demux(cblks, cblk_info, encoded_tblk)
+
+                scrambling(encoded_tblk, blp_info_per_ue, scrambled_tblk_per_ue)
+
+
+
+
+          modifier extract_cblk_info(in blp_info_per_ue, out cblk_info)
+                   extract_cblk_info_cfunc(blp_info_per_ue, cblk_info)
+
+          modifier tblkcrc_generate_encode(in tblk, in blp_info_per_ue, out tblk_crc)
+                   tblkcrc_generate_encode_cfunc(tblk, blp_info_per_ue, tblk_crc)
+
+          modifier tblk_cblk_mux(in tblk_crc, in cblk_info, out cblks[])
+                   tblk_cblk_mux_cfunc(tblk_crc, cblk_info, cblks)
+
+          modifier cblk_tblk_demux(in cblks[], in cblk_info, out encoded_tblk)
+                   cblk_tblk_demux_cfunc(cblks, cblk_info, encoded_tblk)
+
+          modifier scrambling(in encoded_tblk, in blp_info_per_ue, out scrambled_tblk)
+                   scrambling_cfunc(encoded_tblk, blp_info_per_ue, scrambled_tblk)
+                   
+        %*******************************************************************************************
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
