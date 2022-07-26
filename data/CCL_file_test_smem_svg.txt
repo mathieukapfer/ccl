@@ -55,7 +55,7 @@
 #timing parameters
 [define = 400], [end_define = 500], [L2toL2 = 550], [observe_start = 600], [observe_end = 700],
 # resources used
-[defining resource = pe2_0], [define memory offset = 500000], [observe memory offset = 400000];
+[defining resource = pe2_2], [define memory offset = 500000], [observe memory offset = 400000];
 
 [phase = 0],
 [action = descrambler_cfunc], [elementsize = 50000], [runtime = 40000], [definition_ID(arg#) = 16(3)],
@@ -63,7 +63,7 @@
 #timing parameters
 [define = 800], [end_define = 900], [observe_start = 1000], [observe_end = 1200],
 # resources used
-[defining resource = pe2_1], [define memory offset = 500000], [observe memory offset = 500000];
+[defining resource = pe2_4], [define memory offset = 500000], [observe memory offset = 500000];
 
 
 # L2 to DDR

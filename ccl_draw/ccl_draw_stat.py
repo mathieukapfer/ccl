@@ -49,7 +49,7 @@ def create_dma_event(date, event, value, isMaster):
     return dma_event
 
 
-def stat_create_events(nodes):
+def stat_create_events(nodes, max_cluster):
     """
     input:
         nodes: dictionary of ccl file stream
@@ -61,7 +61,7 @@ def stat_create_events(nodes):
     """
 
     # list of events by cluster
-    events = [[], []]
+    events = [[] for i in range(max_cluster + 1)]
 
     for index in nodes:
         node = nodes[index]
@@ -92,7 +92,7 @@ def stat_create_events(nodes):
 
                 # Create 'smem used size' event
                 # - increase when stream is processing
-                delta = int(node.get('elementsize')) + int(node.get('internal memory'))
+                delta = int(node.get('elementsize')) + int(node.get('internal memory', 0))
                 events[cluster].append({
                     'date': int(node.get('define')),
                     'event': 'smem',
@@ -209,7 +209,7 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
     return x, y
 
 
-def draw_stat_events(events, ax):
+def draw_stat_events(events, stat_axis, dma_axis):
     """
     Integrate events and display its
     """
@@ -226,33 +226,33 @@ def draw_stat_events(events, ax):
         print(sorted_cluster_events)
 
         # define axis
-        ax2 = ax[cluster].twinx()
-        ax1 = ax[cluster]
+        ax_stat_pe = stat_axis[cluster].twinx()
+        ax_stat_smem = stat_axis[cluster]
 
         # draw % PE usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
         x, y = stat_integrate_events_with_edge(sorted_events)
 
-        ax2.plot(x, y, linewidth=1, marker='.', c='blue', markersize=0)
-        ax2.yaxis.label.set_color('blue')
-        ax2.set_ylabel("nb PEs")
-        ax2.set_ylim([0, 16])
-        ax2.fill_between(x, y, 0, color='blue', alpha=.1)
-        [t.set_color('blue') for t in ax2.yaxis.get_ticklabels()]
+        ax_stat_pe.plot(x, y, linewidth=1, marker='.', c='blue', markersize=0)
+        ax_stat_pe.yaxis.label.set_color('blue')
+        ax_stat_pe.set_ylabel("nb PEs")
+        ax_stat_pe.set_ylim([0, 16])
+        ax_stat_pe.fill_between(x, y, 0, color='blue', alpha=.1)
+        [t.set_color('blue') for t in ax_stat_pe.yaxis.get_ticklabels()]
 
         # draw % smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
         x, y = stat_integrate_events_with_edge(sorted_events, 2*1024*1024/100)
 
-        ax1.plot(x, y, linewidth=1, marker='.', c='green', markersize=0)
-        ax1.yaxis.label.set_color('green')
-        ax1.set_ylabel("% SMEM")
-        ax1.set_ylim([0, 100])
-        ax1.fill_between(x, y, 0, color='green', alpha=.3)
-        [t.set_color('green') for t in ax1.yaxis.get_ticklabels()]
+        ax_stat_smem.plot(x, y, linewidth=1, marker='.', c='green', markersize=0)
+        ax_stat_smem.yaxis.label.set_color('green')
+        ax_stat_smem.set_ylabel("% SMEM")
+        ax_stat_smem.set_ylim([0, 100])
+        ax_stat_smem.fill_between(x, y, 0, color='green', alpha=.3)
+        [t.set_color('green') for t in ax_stat_smem.yaxis.get_ticklabels()]
 
         # DMA
-        ax_dma = ax[cluster+2]
+        ax_dma = dma_axis[cluster]
 
         # draw % SMEM Bus usage
         sorted_events = [event for event in sorted_cluster_events if
@@ -298,31 +298,31 @@ def draw_stat_events(events, ax):
         #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
 
         # return axis for final rendering
-        axis.append([ax1, ax2, ax_dma])
+        axis.append([ax_stat_smem, ax_stat_pe, ax_dma])
 
     return axis
 
 
 # filename = "data/CCL_file_phase3.txt"
-filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
+# filename = "data/ToKalray12JUL22/CCL_file.txt"    # Rx + Tx
 # filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-# filename = 'data/CCL_file_test_smem_svg.txt'
+filename = 'data/CCL_file_test_smem_svg.txt'
 
 
-def draw_stat(nodes, ax):
+def draw_stat(nodes, max_cluster, stat_axis, dma_axis):
     """
     Produce statistic on data streams
     input:
        - nodes: data streams dictionary
        - ax: list of axes to display statistics, one per cluster
     """
-    events = stat_create_events(nodes)
+    events = stat_create_events(nodes, max_cluster)
     # print(events)
-    return draw_stat_events(events, ax)
+    return draw_stat_events(events, stat_axis, dma_axis)
 
 
 def test_stat():
@@ -331,20 +331,29 @@ def test_stat():
     """
     fig = plt.figure()
 
+    # parse ccl file
+    nodes = ccl_file_parser(filename)
+    print(nodes)
+
     # stats by cluster
-    ax1 = fig.add_subplot(411)
-    ax2 = fig.add_subplot(412)
-    # ax = [ax1, ax2]
-    ax3 = fig.add_subplot(413)
-    ax4 = fig.add_subplot(414)
-    ax = [ax1, ax2, ax3, ax4]
+    stat_axis = list()
+    stat_axis.append(fig.add_subplot(321))
+    stat_axis.append(fig.add_subplot(323))
+    stat_axis.append(fig.add_subplot(325))
+
+    # dma by cluster
+    dma_axis = list()
+    dma_axis.append(fig.add_subplot(322))
+    dma_axis.append(fig.add_subplot(324))
+    dma_axis.append(fig.add_subplot(326))
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
     print(nodes)
 
     # draw stat
-    draw_stat(nodes, ax)
+    print(stat_axis)
+    draw_stat(nodes, 3, stat_axis, dma_axis)
 
     # show
     plt.show(block=False)

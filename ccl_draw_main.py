@@ -13,30 +13,30 @@ def ccl_draw():
     nodes = ccl_file_parser(filename)
 
     # check nb clusters
-    nb_cluster=0
+    max_cluster = 0
     for node_index in nodes:
         node = nodes[node_index]
-        if node['cluster'] > nb_cluster:
-            nb_cluster = node['cluster']
-    print("nb cluster: {}".format(nb_cluster))
+        if node['cluster'] > max_cluster:
+            max_cluster = node['cluster']
+    print("max cluster: {}".format(max_cluster))
 
 
     # build fig spec according to nb clusters
     mosaic = [[], [], []]  # SMEM, stat, dma
     width_ratios = []
 
-    # If nb_cluster=2, generate:
-    # - mosaic= [['cluster 1', 'cluster 2'],
-    #            ['stat1', 'stat2'],
-    #            ['dma1', 'dma2']]
+    # If max_cluster=1, generate:
+    # - mosaic= [['cluster 0', 'cluster 1'],
+    #            ['stat0', 'stat1'],
+    #            ['dma0', 'dma1']]
     # - width_ratios = [1, 1]
-    for i in range(0, nb_cluster + 1):  # first cluster has number '0'
-        mosaic[0].append('cluster {}'.format(i+1))  # TODO: remove +1
-        mosaic[1].append('stat{}'.format(i+1))
-        mosaic[2].append('dma{}'.format(i+1))
+    for i in range(0, max_cluster + 1):  # first cluster has number '0'
+        mosaic[0].append('cluster {}'.format(i))
+        mosaic[1].append('stat{}'.format(i))
+        mosaic[2].append('dma{}'.format(i))
         width_ratios.append(1)
 
-    # print("mosaic: {}".format(mosaic))
+    print("mosaic: {}".format(mosaic))
 
     # define style
     plt.style.use('seaborn')
@@ -52,14 +52,18 @@ def ccl_draw():
                                   #constrained_layout=True
     )
 
+    # init list of figures by cluster
+    smem_axis = list()
+    stat_axis = list()
+    dma_axis = list()
 
     # change properties
-    for cluster in range(0, nb_cluster + 1):
-        smem = 'cluster {}'.format(cluster+1)
-        stat = 'stat{}'.format(cluster+1)
-        dma = 'dma{}'.format(cluster+1)
+    for cluster in range(0, max_cluster + 1):
+        smem = 'cluster {}'.format(cluster)
+        stat = 'stat{}'.format(cluster)
+        dma = 'dma{}'.format(cluster)
 
-        # - shared x axes
+        # shared x axes
         axd[smem].tick_params('x', labelbottom=False)
         axd[stat].tick_params('x', labelbottom=False)
         axd[stat].get_shared_x_axes().join(axd[stat], axd[smem])
@@ -80,30 +84,44 @@ def ccl_draw():
             # - remove inner tick and label
             axd[smem].tick_params('y', labelleft=False)
 
+        # build these lists for futur usage
+        smem_axis.append(axd[smem])
+        stat_axis.append(axd[stat])
+        dma_axis.append(axd[dma])
 
     # draw smem usage
-    draw_smem_map(nodes, fig, axd['cluster 1'],  # last axes (needed for arrow inter-axis)
-                  [axd['cluster 1'], axd['cluster 2']])
+    draw_smem_map(nodes, fig,
+                  axd['cluster {}'.format(max_cluster)],  # last axes carry the arrows
+                  smem_axis  # smem figures
+                  # [axd['cluster 1'], axd['cluster 2']]
+    )
 
-    # draw statistic
-    axis = draw_stat(nodes, [axd['stat1'], axd['stat2'], axd['dma1'], axd['dma2']])
+    # draw statistics
+    axis = draw_stat(nodes, max_cluster, stat_axis, dma_axis)
 
     # remove inner y tick and label
-    # - remove Stat right scale of cluster 0
-    axis[0][1].set_ylabel("")
-    axis[0][1].tick_params('y', labelright=False)
+    # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
+    for cluster in range(0, max_cluster):
+        # - remove PE Stat right scale
+        axis[cluster][1].set_ylabel("")
+        axis[cluster][1].tick_params('y', labelright=False)
 
-    # - remove Stat left scale of cluster 1
-    axis[1][0].set_ylabel("")
-    axis[1][0].tick_params('y', labelleft=False)
+        # - remove SMEM left scale of next cluster
+        axis[cluster+1][0].set_ylabel("")
+        axis[cluster+1][0].tick_params('y', labelleft=False)
 
-    # - remove DMA left scale of cluster 1
-    axis[1][2].set_ylabel("")
-    axis[1][2].tick_params('y', labelleft=False)
+        # - remove DMA left scale of next cluster
+        axis[cluster+1][2].set_ylabel("")
+        axis[cluster+1][2].tick_params('y', labelleft=False)
 
     # same range for DMA event for all clusters
-    ymin = min(axis[0][2].get_ylim()[0], axis[1][2].get_ylim()[0])
-    ymax = max(axis[0][2].get_ylim()[1], axis[1][2].get_ylim()[1])
+    # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
+    ymin = axis[0][2].get_ylim()[0]
+    ymax = axis[0][2].get_ylim()[1]
+    for cluster in range(1, max_cluster+1):
+        ymin = min(ymin, axis[cluster][2].get_ylim()[0])
+        ymax = max(ymax, axis[cluster][2].get_ylim()[0])
+
     axis[0][2].set_ylim([ymin, ymax])
     axis[1][2].set_ylim([ymin, ymax])
 
@@ -118,7 +136,7 @@ filename = "data/CCL_file_phase3.txt"
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-# filename = 'data/CCL_file_test_smem_svg.txt'
+filename = 'data/CCL_file_test_smem_svg.txt'
 
 
 ccl_draw()
