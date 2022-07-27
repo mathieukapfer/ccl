@@ -35,6 +35,7 @@ def draw_arrow(fig, last_axes, axes_tail, axes_head, x1, y1, x2, y2, style):
                           connectionstyle=style['connectionstyle'],
                           arrowstyle=style['arrowstyle'],
                           color=style['color'],
+                          zorder=5,
     )
     print('Arrow {},{}->{},{}'.format(x1, y1, x2, y2))
     last_axes.add_artist(con)
