@@ -209,6 +209,27 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
     return x, y
 
 
+def draw_stat_ax(ax, x, y, color, style=".", ylabel=0, ylim=0, alpha=0.1):
+    """
+    Helper to plot one stat ax
+    input
+      - ax:     the ax to plot where
+      - x, y:   the data to plot
+      - color:  color of plot
+      - ylabel: title of y axe
+      - ylim:   [min, max] value
+      - alpha:  transpapance level of color below the curve
+    """
+    ax.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
+    if ylabel:
+        ax.set_ylabel(ylabel)
+        ax.yaxis.label.set_color(color)
+    if ylim:
+        ax.set_ylim(ylim)
+    ax.fill_between(x, y, 0, color=color, alpha=alpha)
+    [t.set_color(color) for t in ax.yaxis.get_ticklabels()]
+
+
 def draw_stat_events(events, stat_axis, dma_axis):
     """
     Integrate events and display its
@@ -233,24 +254,12 @@ def draw_stat_events(events, stat_axis, dma_axis):
         # draw % PE usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
         x, y = stat_integrate_events_with_edge(sorted_events)
-
-        ax_stat_pe.plot(x, y, linewidth=1, marker='.', c='blue', markersize=0)
-        ax_stat_pe.yaxis.label.set_color('blue')
-        ax_stat_pe.set_ylabel("nb PEs")
-        ax_stat_pe.set_ylim([0, 16])
-        ax_stat_pe.fill_between(x, y, 0, color='blue', alpha=.1)
-        [t.set_color('blue') for t in ax_stat_pe.yaxis.get_ticklabels()]
+        draw_stat_ax(ax_stat_pe, x, y, 'blue', "nbPEs", [0, 16], 0.1)
 
         # draw % smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
         x, y = stat_integrate_events_with_edge(sorted_events, 2*1024*1024/100)
-
-        ax_stat_smem.plot(x, y, linewidth=1, marker='.', c='green', markersize=0)
-        ax_stat_smem.yaxis.label.set_color('green')
-        ax_stat_smem.set_ylabel("% SMEM")
-        ax_stat_smem.set_ylim([0, 100])
-        ax_stat_smem.fill_between(x, y, 0, color='green', alpha=.3)
-        [t.set_color('green') for t in ax_stat_smem.yaxis.get_ticklabels()]
+        draw_stat_ax(ax_stat_smem, x, y, 'green', "% SMEM", [0, 100], .3)
 
         # DMA
         ax_dma = dma_axis[cluster]
@@ -258,45 +267,21 @@ def draw_stat_events(events, stat_axis, dma_axis):
         # draw % SMEM Bus usage
         sorted_events = [event for event in sorted_cluster_events if
                          event['event'] == 'SMEM bus']
-        print("SMEM bus - Cluster {}: {}".format(cluster, sorted_events))
         x, y = stat_integrate_events_with_edge(sorted_events)
-
-        color = 'orange'
-        ax_dma.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
-        # ax_dma.yaxis.label.set_color(color)
-        # ax_dma.set_ylabel("SMEM bus")
-        # ax_dma.set_ylim([0, 100])
-        ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
-        #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+        draw_stat_ax(ax_dma, x, y, 'orange', alpha=0.1)
 
         # draw % DDR Bus usage
-        # working well but remove for figure clarity
+        # working well but remove to get a lighter graph
         if False:
             sorted_events = [event for event in sorted_cluster_events if
                              event['event'] == 'DDR bus']
-            print("DDR bus - Cluster {}: {}".format(cluster, sorted_events))
-            x, y = stat_integrate_events_with_edge(sorted_events)
-
-            color = 'darkred'
-            ax_dma.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
-            # ax_dma.yaxis.label.set_color(color)
-            # ax_dma.set_ylabel("SMEM bus")
-            # ax_dma.set_ylim([0, 100])
-            ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
-            #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+            draw_stat_ax(ax_dma, x, y, 'darkred', alpha=0.1)
 
         # draw % DMA event
         sorted_events = [event for event in sorted_cluster_events if
                          event['event'] == 'DMA event']
-        print("DMA event - Cluster {}: {}".format(cluster, sorted_events))
         x, y = stat_integrate_events_with_edge(sorted_events)
-        color = 'darkorange'
-        ax_dma.plot(x, y, '--', linewidth=1, c=color, markersize=0)
-        ax_dma.yaxis.label.set_color(color)
-        ax_dma.set_ylabel("DMA event\n& buses")
-        # ax_dma.set_ylim([0, 100])
-        #ax_dma.fill_between(x, y, 0, color=color, alpha=.1)
-        #[t.set_color(color) for t in ax_dma.yaxis.get_ticklabels()]
+        draw_stat_ax(ax_dma, x, y, 'darkorange', style='--', ylabel='DMA event\n& buses')
 
         # return axis for final rendering
         axis.append([ax_stat_smem, ax_stat_pe, ax_dma])
