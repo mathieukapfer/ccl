@@ -209,7 +209,7 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
     return x, y
 
 
-def draw_stat_ax(ax, x, y, color, style=".", ylabel=0, ylim=0, alpha=0.1):
+def draw_stat_ax(ax, x, y, color, style='-', ylabel=0, ylim=0, alpha=0.1):
     """
     Helper to plot one stat ax
     input
@@ -220,7 +220,7 @@ def draw_stat_ax(ax, x, y, color, style=".", ylabel=0, ylim=0, alpha=0.1):
       - ylim:   [min, max] value
       - alpha:  transpapance level of color below the curve
     """
-    ax.plot(x, y, linewidth=1, marker='.', c=color, markersize=0)
+    ax.plot(x, y, linewidth=1, marker=".", linestyle=style, c=color, markersize=0)
     if ylabel:
         ax.set_ylabel(ylabel)
         ax.yaxis.label.set_color(color)
@@ -254,12 +254,12 @@ def draw_stat_events(events, stat_axis, dma_axis):
         # draw % PE usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'PE']
         x, y = stat_integrate_events_with_edge(sorted_events)
-        draw_stat_ax(ax_stat_pe, x, y, 'blue', "nbPEs", [0, 16], 0.1)
+        draw_stat_ax(ax_stat_pe, x, y, 'blue', "-", "nbPEs", [0, 16], 0.1)
 
         # draw % smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
         x, y = stat_integrate_events_with_edge(sorted_events, 2*1024*1024/100)
-        draw_stat_ax(ax_stat_smem, x, y, 'green', "% SMEM", [0, 100], .3)
+        draw_stat_ax(ax_stat_smem, x, y, 'green', "-", "% SMEM", [0, 100], .3)
 
         # DMA
         ax_dma = dma_axis[cluster]
@@ -268,14 +268,14 @@ def draw_stat_events(events, stat_axis, dma_axis):
         sorted_events = [event for event in sorted_cluster_events if
                          event['event'] == 'SMEM bus']
         x, y = stat_integrate_events_with_edge(sorted_events)
-        draw_stat_ax(ax_dma, x, y, 'orange', alpha=0.1)
+        draw_stat_ax(ax_dma, x, y, 'orange', "-", alpha=0.1)
 
         # draw % DDR Bus usage
         # working well but remove to get a lighter graph
         if False:
             sorted_events = [event for event in sorted_cluster_events if
                              event['event'] == 'DDR bus']
-            draw_stat_ax(ax_dma, x, y, 'darkred', alpha=0.1)
+            draw_stat_ax(ax_dma, x, y, 'darkred', "-", alpha=0.1)
 
         # draw % DMA event
         sorted_events = [event for event in sorted_cluster_events if
