@@ -129,14 +129,19 @@ def ccl_draw():
     plt.show(block=False)
 
 
-filename = "data/CCL_file_phase3.txt"
 # filename = "data/ToKalray12JUL22/CCL_file.txt"  # RX v2
 # filename = "data/ToKalray05JUL22/CCL_file.txt"  # RX working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
+# filename = "data/CCL_file_phase3.txt"
+# filename = "data/ToKalray04AUG22/CCL_file_Rx0_.txt"
+# filename = "data/ToKalray04AUG22/CCL_file_Tx0_.txt"
+filename = "data/ToKalray04AUG22/CCL_file_RxTx.txt"
+
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
+
 
 
 ccl_draw()

@@ -107,7 +107,7 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
         # draw define bloc
         x1 = int(node.get('define', 0))
         y1 = int(node.get('define memory offset', 0))
-        x2 = int(node.get('end_define', 0))
+        x2 = int(node.get('end_define', 0)) + 1
         y2 = y1 + int(node.get('elementsize', 0))
 
         if y1 > 0:
@@ -187,7 +187,7 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
                 # text
                 ax_obs.annotate(name_obs, (x1, y1), fontsize=7)
                 # arrow
-                # - if broadcast, deplace '-1' by source
+                # - if broadcast, replace '-1' by source
                 if def_y1 < 0:
                     def_y1 = get_broadcast_source(nodes, node)
                 if def_y1 > 0:  # remove erroneous broadcast display [TMP]
@@ -227,13 +227,15 @@ def get_broadcast_source(nodes, node):
 
 
 # filename = "data/CCL_file_phase3.txt"
+# filename = "data/CCL_file_phase3_only_broadcast.txt"
 # filename = "data/ToKalray12JUL22/CCL_file.txt"  # Rx + Tx
 # filename = "data/ToKalray05JUL22/CCL_file.txt"  # working memory
 # filename = "data/ToKalray07JUL22/CCL_file.txt"  # Tx
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-filename = 'data/CCL_file_test_smem_svg.txt'
+# filename = 'data/CCL_file_test_smem_svg.txt'
+filename = "data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
 
 def test_draw_smem_layout():

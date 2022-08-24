@@ -1,0 +1,107 @@
+
+# flow.top_level_test.s2.flow.pusch_bit_level_processing.stream.descramble_soft_bits.1_cell0
+# big_delay.DDR.L2.pe0_0.cl0
+# stream parameters
+[phase = 0]
+[action = descrambler_cfunc], [elementsize = 23184],[runtime = 39000], [internal memory = 1500], [definition_ID(arg#) = 19(3)],
+[observation_ids(arg#s) = 3(1), 88(2)],
+#timing parameters
+[define = 60], [end_define = 89], [L2toDDR = 91], [DDRtoL2 = 94], [observe_start = 97], [observe_end = 649],
+# resources used
+[defining resource = pe0_0], [define memory offset = 3256], [internal memory offset = 201656], [observe memory offset = 126580];
+
+# flow.top_level_test.s2.flow.pusch_bit_level_processing.s2.flow.cb_segmentation.stream.data_cblk_list.1_cell0
+# pipeline.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = extract_data_cblk_info_cfunc], [elementsize = 10256],[runtime = 2000], [internal memory = 200], [definition_ID(arg#) = 39(2)],
+[observation_ids(arg#s) = 89(1)],
+#timing parameters
+[define = 18], [end_define = 19], [observe_start = 104], [observe_end = 152],
+# resources used
+[defining resource = pe1_0], [define memory offset = 72200], [internal memory offset = 82712];
+
+# flow.top_level_test.s2.flow.pusch_bit_level_processing.s3.flow.ulsch_decode.stream.t_rate_dematch_soft_bits_cblk.1.1_cell0
+# big_delay.DDR.L2.pe1_0.cl1
+# stream parameters
+[phase = 0, 2]
+[action = rate_dematch_cfunc], [elementsize = 23936],[runtime = 41000], [internal memory = 2000], [definition_ID(arg#) = 55(4)],
+[observation_ids(arg#s) = 21(2), 90(3)],
+[parameter_values(arg#s) = 1(1)],
+#timing parameters
+[define = 558], [end_define = 589], [L2toDDR = 591], [DDRtoL2 = 0], [observe_start = 4], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = 39664], [internal memory offset = 80912], [observe memory offset = 5000];
+
+
+
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.stream.descramble_soft_bits.1_cell0
+# pipeline.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 88(1)],
+#timing parameters
+[define = 0], [end_define = 0], [observe_start = 2], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = 30440], [internal memory offset = 29940];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.s2.flow.cb_segmentation.stream.data_cblk_list.1_cell0
+# pipeline.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 89(1)],
+#timing parameters
+[define = 0], [end_define = 0], [observe_start = 18], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = -1], [internal memory offset = -1];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.s3.flow.ulsch_decode.stream.t_rate_dematch_soft_bits_cblk.1.1_cell0
+# big_delay.DDR.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 90(1)],
+#timing parameters
+[define = 0], [end_define = 0], [L2toDDR = 102], [DDRtoL2 = 107], [observe_start = 109], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = -1], [internal memory offset = -1], [observe memory offset = 71944];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.s3.flow.ulsch_decode.stream.t_rate_dematch_soft_bits_cblk.1.2_cell0
+# pipeline.L2.pe1_0.cl0
+# stream parameters
+[phase = 0]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 91(1)],
+#timing parameters
+[define = 0], [end_define = 0], [observe_start = 109], [observe_end = 649],
+# resources used
+[defining resource = pe1_0], [define memory offset = -1], [internal memory offset = -1];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.stream.decoded_bits_cblk.1.1_cell0
+# big_delay.DDR.L2.pe1_0.cl1
+# stream parameters
+[phase = 0, 2]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 92(1)],
+#timing parameters
+[define = 0], [end_define = 0], [L2toDDR = 98], [DDRtoL2 = 9], [observe_start = 21], [observe_end = 561],
+# resources used
+[defining resource = pe1_0], [define memory offset = -1], [internal memory offset = -1], [observe memory offset = 28936];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.stream.decoded_bits_cblk.2.1_cell0
+# big_delay.DDR.L2.pe1_0.cl1
+# stream parameters
+[phase = 0, 2]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 93(1)],
+#timing parameters
+[define = 0], [end_define = 0], [L2toDDR = 99], [DDRtoL2 = 10], [observe_start = 21], [observe_end = 561],
+# resources used
+[defining resource = pe1_0], [define memory offset = -1], [internal memory offset = -1], [observe memory offset = 34448];
+
+# flow.top_level_test.stream.blpinfo_perUEGrp.1_cell0==>flow.top_level_test.s2.flow.pusch_bit_level_processing.stream.decoded_bits_cblk.1.2_cell0
+# big_delay.DDR.L2.pe1_0.cl1
+# stream param# stream parameters
+[phase = 0, 2]
+[action = getUserBLPInfo_cfunc], [elementsize = 10256],[runtime = 1000], [internal memory = 500], [definition_ID(arg#) = 105(1)],
+#timing parameters
+[define = 0], [end_define = 0], [L2toDDR = 590], [DDRtoL2 = 12], [observe_start = 14], [observe_end = 649],
+# resources used
+[defining resource = pe0_0], [define memory offset = -1], [internal memory offset = -1], [observe memory offset = 163564];

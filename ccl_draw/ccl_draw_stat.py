@@ -2,6 +2,9 @@
 import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
+# const
+SMEM_rate = 2*1024*1024/100  # percent of 2MB memory
+
 
 def create_dma_event(date, event, value, isMaster):
     """
@@ -73,6 +76,9 @@ def stat_create_events(nodes, max_cluster):
             # Create PE and SMEM usage event
             if int(node.get('define memory offset', -1)) >= 0:
 
+                # for debug purpose
+                streamId = int(node.get('id', -1))
+
                 # Handle super PE as 4 PE
                 if node.get('defining resource')[0:3] == 'sPE':
                     delta = 4
@@ -81,31 +87,36 @@ def stat_create_events(nodes, max_cluster):
 
                 # Create PE usage event
                 events[cluster].append({
+                    'id': streamId,
                     'date': int(node.get('define')),
                     'event': 'PE',
                     'value': delta})
 
                 events[cluster].append({
+                    'id': streamId,
                     'date': int(node.get('end_define')),
                     'event': 'PE',
                     'value': -delta})
 
                 # Create 'smem used size' event
                 # - increase when stream is processing
-                delta = int(node.get('elementsize')) + int(node.get('internal memory', 0))
-                events[cluster].append({
-                    'date': int(node.get('define')),
-                    'event': 'smem',
-                    'value': delta})
+                if (int(node.get('internal memory offset', -1)) > 0):
+                    delta = int(node.get('elementsize')) + int(node.get('internal memory', 0))
+                    events[cluster].append({
+                        'id': streamId,
+                        'date': int(node.get('define')),
+                        'event': 'smem',
+                        'value': delta})
 
-                # - decrease when stream is moved outside cluster or no more observed
-                events[cluster].append({
-                    'date': int(node.get('L2toDDR',
-                                         node.get('L2toL2',
-                                                  node.get('observe_end'
-                                                  )))),
-                    'event': 'smem',
-                    'value': -delta})
+                    # - decrease when stream is moved outside cluster or no more observed
+                    events[cluster].append({
+                        'id': streamId,
+                        'date': int(node.get('L2toDDR',
+                                             node.get('L2toL2',
+                                                      node.get('observe_end'
+                                                      )))),
+                        'event': 'smem',
+                        'value': -delta})
 
             # Create DMA events
             HACK = True
@@ -197,6 +208,7 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
             previous_integrated_value = integrated_value
 
         # sum each event of the same date
+        # print(event)
         integrated_value += event['value']
         print("delta {},{}".format(date, integrated_value))
 
@@ -258,7 +270,7 @@ def draw_stat_events(events, stat_axis, dma_axis):
 
         # draw % smem usage
         sorted_events = [event for event in sorted_cluster_events if event['event'] == 'smem']
-        x, y = stat_integrate_events_with_edge(sorted_events, 2*1024*1024/100)
+        x, y = stat_integrate_events_with_edge(sorted_events, SMEM_rate)
         draw_stat_ax(ax_stat_smem, x, y, 'green', "-", "% SMEM", [0, 100], .3)
 
         # DMA
@@ -296,7 +308,9 @@ def draw_stat_events(events, stat_axis, dma_axis):
 # filename = "data/ToKalray07JUL22/CCL_file_extract_broadcast.txt"
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-filename = 'data/CCL_file_test_smem_svg.txt'
+# filename = 'data/CCL_file_test_smem_svg.txt'
+# filename = "data/CCL_file_phase3_only_broadcast.txt"
+filename = "data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
 
 def draw_stat(nodes, max_cluster, stat_axis, dma_axis):

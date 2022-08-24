@@ -1,0 +1,76 @@
+include "..\NR_PUSCH_COMMON\nrPUSCH_defines.rdsl"
+include "..\NR_BLP_RDSL\nrPUSCH_Blpv9LDPCpool.rdsl"
+
+%****************************************************************
+extern getSoftBitsData_cfunc(out1)
+extern getUserBLPInfo_cfunc(out1)
+extern putUserTBLKData_cfunc(in1,out1)
+%*****************************************************************
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Flow to process data into test
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+flow get_input_data
+
+     perUEGRP_SoftBits_in	:stream{type = out}
+     blpinfo_perUEGrp_in	:stream{type = out}
+
+     getUserSoftBitsdata(perUEGRP_SoftBits_in)
+     getUserBLPInfo(blpinfo_perUEGrp_in)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Flow to process data out of test
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+flow put_output_data
+
+     tblk_per_ue_out	:stream{type = in}
+     tblk_stubbed_out	:stream
+
+     putUserTBLKData(tblk_per_ue_out, tblk_stubbed_out)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Top level Flow to run BLP test
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+flow top_level_test
+
+     perUEGRP_SoftBits		:stream[MAX_NUM_UL_UEGRPS]
+     blpinfo_perUEGrp		:stream[MAX_NUM_UL_UEGRPS]
+     tblk_per_ue		:stream[MAX_NUM_UL_UEGRPS]
+
+
+     %get input data
+     get_input_data{i = 1:MAX_NUM_UL_UEGRPS,
+     	perUEGRP_SoftBits_in = perUEGRP_SoftBits[i],
+     	blpinfo_perUEGrp_in = blpinfo_perUEGrp[i]}
+
+     % Bit Level Processing flow
+     pusch_bit_level_processing{
+     			soft_bits = perUEGRP_SoftBits,
+      			blp_info = blpinfo_perUEGrp,
+      			tblk_out = tblk_per_ue}
+     %Put output
+     put_output_data{i = 1:MAX_NUM_UL_UEGRPS,
+     		     tblk_per_ue_out = tblk_per_ue[i]}
+
+
+     
+%*******************************************************************
+% Stub modifier to get equalized data for each user group
+%*******************************************************************
+modifier stub getUserSoftBitsdata(out data_SB)
+	getSoftBitsData_cfunc(data_SB)
+
+%*******************************************************************
+% Stub modifier to get BLP Info for each user group
+%*******************************************************************
+modifier stub getUserBLPInfo(out info_BLP_UGrp)
+	getUserBLPInfo_cfunc(info_BLP_UGrp)
+
+%*******************************************************************
+% Stub modifier to put equalizedtransport block data for each user group
+%*******************************************************************
+modifier stub putUserTBLKData(in data_TBLK_UGrp, out stubbed_dummy)
+	putUserTBLKData_cfunc(data_TBLK_UGrp, stubbed_dummy)
+
+
