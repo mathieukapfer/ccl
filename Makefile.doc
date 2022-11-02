@@ -1,0 +1,6 @@
+O := output
+
+all:
+
+%:
+	$(MAKE) -C doc    O=$O "$@"
