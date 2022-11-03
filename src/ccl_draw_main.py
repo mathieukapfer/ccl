@@ -126,7 +126,8 @@ def ccl_draw():
     axis[1][2].set_ylim([ymin, ymax])
 
     # display
-    plt.show(block=False)
+    # plt.show(block=False)
+    plt.show()
 
 
 # filename = "data/ToKalray12JUL22/CCL_file.txt"  # RX v2
@@ -136,7 +137,7 @@ def ccl_draw():
 # filename = "data/CCL_file_phase3.txt"
 # filename = "data/ToKalray04AUG22/CCL_file_Rx0_.txt"
 # filename = "data/ToKalray04AUG22/CCL_file_Tx0_.txt"
-filename = "data/ToKalray04AUG22/CCL_file_RxTx.txt"
+filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'

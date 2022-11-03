@@ -25,7 +25,8 @@ def ccl_to_graph(filename):
 
     # draw networkx graph with matplotlib
     draw_graph(G, critical_path='yes')
-    plt.show(block=False)
+    # plt.show(block=False)
+    plt.show()
 
     # write dot file
     write_dot_graph(G)
@@ -41,6 +42,6 @@ def ccl_to_graph(filename):
 # filename = "data/20JUL22_Cirrus360/CCL_file.txt"    # Tx fixed
 # filename = "data/CCL_file_extract.txt"
 # filename = "data/20JUL22_Cirrus360/CCL_file.txt"    # Tx fixed
-filename = "data/ToKalray04AUG22/CCL_file_RxTx.txt"
+filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
 ccl_to_graph(filename)

@@ -195,4 +195,4 @@ def test_ccl_parsing():
     d = ccl_file_parser(filename)
 
 
-test_ccl_parsing()
+#test_ccl_parsing()
