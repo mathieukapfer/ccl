@@ -192,6 +192,8 @@ $builder.target("install") do
     mkdir_p bin_path
     cmd = "install -m 744 ccl_viewer #{bin_path}"
     $builder.run(:env => env, :cmd => cmd)
+    cmd = "install -m 744 ccl_parser #{bin_path}"
+    $builder.run(:env => env, :cmd => cmd)
 
     # Install doc sources
     cmd = "make -f Makefile.doc O=#{module_build_path}/doc PREFIX=#{module_devimage[:doc_src]}/ install-doc-src"

@@ -11,4 +11,4 @@ else
 fi
 
 cd $SRC_HOME
-pipenv sync && pipenv run python ccl_draw_main.py && cd -
+pipenv sync && pipenv run python ccl_parser_main.py && cd -
