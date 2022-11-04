@@ -180,7 +180,7 @@ $builder.target("install") do
     # Install Python scripts
     python_path = File.join(module_devimage[:runtime], "share", module_label, "src")
     mkdir_p python_path
-    cmd = "cp -r src/*.py src/Pipfile* #{python_path}"
+    cmd = "cp -r src/* #{python_path}"
     $builder.run(:env => env, :cmd => cmd)
 
     # Install helper
