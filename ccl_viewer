@@ -1,0 +1,17 @@
+#!/bin/bash
+LOCAL_PATH=$(dirname ${BASH_SOURCE[0]})
+
+if [ -f $LOCAL_PATH/get_pipenv_path ]
+then
+    SRC_HOME=$LOCAL_PATH/src
+    WORKON_HOME=`$LOCAL_PATH/get_pipenv_path`
+else
+    SRC_HOME="$KALRAY_TOOLCHAIN_DIR/share/oran_ccl_tools/src"
+    WORKON_HOME=`$SRC_HOME/../get_pipenv_path`
+fi
+
+
+echo "*" $WORKON_HOME "*"
+
+cd $SRC_HOME
+pipenv sync && pipenv run python ccl_parser_main.py && cd -

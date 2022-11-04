@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# def get_pipenv_base_path()
+# 	ret = ""
+# 	internal_path = "/work1"
+# 	if File.directory?(internal_path)
+# 		ret = File.join(internal_path, ENV.has_key?("USER") ? ENV['USER'] : "user")
+# 	elsif ENV.has_key?("HOME") and File.directory?(ENV['HOME'])
+# 		ret = ENV['HOME']
+# 	else
+# 		ret = ENV.has_key?("TMPDIR") and File.directory?(ENV['TMPDIR']) ? ENV['TMPDIR'] : "/tmp"
+# 	end
+# end
+
+# PIPENV_PATH = File.join(get_pipenv_base_path() , ".local/share/virtualenvs")
+
+PIPENV_PATH="/work1/$USER/.local/ccl_tools"
+
+echo $PIPENV_PATH

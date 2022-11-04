@@ -178,9 +178,19 @@ $builder.target("install") do
     cd module_path
 
     # Install Python scripts
-    python_path = File.join(module_devimage[:runtime], "share", module_label, "python")
+    python_path = File.join(module_devimage[:runtime], "share", module_label, "src")
     mkdir_p python_path
-    cmd = "cp -r src/* #{python_path}"
+    cmd = "cp -r src/*.py src/Pipfile* #{python_path}"
+    $builder.run(:env => env, :cmd => cmd)
+
+    # Install helper
+    cmd = "install -m 744 get_pipenv_path #{python_path}/.."
+    $builder.run(:env => env, :cmd => cmd)
+
+    # Install binary wrapper
+    bin_path = File.join(module_devimage[:runtime], "bin")
+    mkdir_p bin_path
+    cmd = "install -m 744 ccl_viewer #{bin_path}"
     $builder.run(:env => env, :cmd => cmd)
 
     # Install doc sources
