@@ -4,8 +4,9 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 from ccl_draw.ccl_draw_smem import draw_smem_map
 from ccl_draw.ccl_draw_stat import draw_stat
 
+import sys, getopt
 
-def ccl_draw():
+def ccl_draw(filename):
     """
     """
 
@@ -137,12 +138,13 @@ def ccl_draw():
 # filename = "data/CCL_file_phase3.txt"
 # filename = "data/ToKalray04AUG22/CCL_file_Rx0_.txt"
 # filename = "data/ToKalray04AUG22/CCL_file_Tx0_.txt"
-filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
+# filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
 # filename = 'data/CCL_file_test_smem_svg.txt'
 
+# ccl_draw()
 
-
-ccl_draw()
+if __name__ == "__main__":
+    ccl_draw(sys.argv[1])

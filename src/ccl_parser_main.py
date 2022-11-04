@@ -5,6 +5,7 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 
 from ccl_graph.ccl_graph_viewer import draw_graph
 
+import sys, getopt
 
 # build graph from ccl file
 def ccl_to_graph(filename):
@@ -32,6 +33,9 @@ def ccl_to_graph(filename):
     write_dot_graph(G)
 
 
+if __name__ == "__main__":
+    ccl_to_graph(sys.argv[1])
+
 # filename = 'CCL_file_2cblk.txt'
 # filename = 'ccl_file_12May22.txt'
 # filename = 'CCL_file_orig.txt'
@@ -42,6 +46,6 @@ def ccl_to_graph(filename):
 # filename = "data/20JUL22_Cirrus360/CCL_file.txt"    # Tx fixed
 # filename = "data/CCL_file_extract.txt"
 # filename = "data/20JUL22_Cirrus360/CCL_file.txt"    # Tx fixed
-filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
+# filename = "../data/ToKalray04AUG22/CCL_file_RxTx.txt"
 
-ccl_to_graph(filename)
+# ccl_to_graph(filename)
