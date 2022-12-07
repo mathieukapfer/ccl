@@ -8,6 +8,9 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 
 from ccl_graph.ccl_graph_viewer import draw_graph
 
+# create logger
+logger_root = logging.getLogger("ccl")
+
 
 # build graph from ccl file
 def ccl_to_graph(filename):
@@ -40,16 +43,28 @@ if __name__ == "__main__":
     # ccl_to_graph(sys.argv[1])
 
     # declare parser
-    parser = argparse.ArgumentParser(description='Display CCL file diagram')
+    parser = argparse.ArgumentParser(description='Display CCL file graph')
+    parser.add_argument('dirname', nargs='?', help='The CCL file directory')
     parser.add_argument('filename', nargs=1, help='The CCL file to parse')
-    parser.add_argument('-v', dest='verbose', action='store_const',
-                        const=1, default=0, help='enable verbose mode (including backtrace)')
+    parser.add_argument('-v', dest='verbose', action='store',
+                        default=0, help='enable verbose mode: 1=info, 2=debug')
 
     # parse
     args = parser.parse_args()
 
-    if args.verbose == 1:
-        logging.basicConfig(level=logging.DEBUG)
+    # set user information level
+    if int(args.verbose) >= 2:
+        logger_root.level = logging.DEBUG
+        logging.debug("enable log")
+    elif int(args.verbose) >= 1:
+        logger_root.level = logging.INFO
+        logging.info("enable log")
+
+    # add directory if present
+    if args.dirname is not None:
+        filename_ = args.dirname + '/' + args.filename[0]
+    else:
+        filename_ = args.filename[0]
 
     # go !
-    ccl_to_graph(args.filename[0])
+    ccl_to_graph(filename_)
