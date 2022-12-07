@@ -206,6 +206,9 @@ $builder.target("package") do
 
     # Runtime package
     depends = []
+
+    depends.push($builder.depends_info_struct.new("graphviz", nil, nil, nil))
+
     $builder.create_package_with_files(
         :name => module_pkg_name[:runtime],
         :desc => "CCL file tools: parse CCL file and display graphical view\n",
