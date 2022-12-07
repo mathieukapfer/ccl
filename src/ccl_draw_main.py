@@ -100,36 +100,36 @@ def ccl_draw(filename):
     # draw statistics
     axis = draw_stat(nodes, max_cluster, stat_axis, dma_axis)
 
-    # remove inner y tick and label
-    # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
-    for cluster in range(0, max_cluster):
-        # - remove PE Stat right scale
-        axis[cluster][1].set_ylabel("")
-        axis[cluster][1].tick_params('y', labelright=False)
+    if (max_cluster > 0):
+        # remove inner y tick and label
+        # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
+        for cluster in range(0, max_cluster):
+            # - remove PE Stat right scale
+            axis[cluster][1].set_ylabel("")
+            axis[cluster][1].tick_params('y', labelright=False)
 
-        # - remove SMEM left scale of next cluster
-        axis[cluster+1][0].set_ylabel("")
-        axis[cluster+1][0].tick_params('y', labelleft=False)
+            # - remove SMEM left scale of next cluster
+            axis[cluster+1][0].set_ylabel("")
+            axis[cluster+1][0].tick_params('y', labelleft=False)
 
-        # - remove DMA left scale of next cluster
-        axis[cluster+1][2].set_ylabel("")
-        axis[cluster+1][2].tick_params('y', labelleft=False)
+            # - remove DMA left scale of next cluster
+            axis[cluster+1][2].set_ylabel("")
+            axis[cluster+1][2].tick_params('y', labelleft=False)
 
-    # same range for DMA event for all clusters
-    # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
-    ymin = axis[0][2].get_ylim()[0]
-    ymax = axis[0][2].get_ylim()[1]
-    for cluster in range(1, max_cluster+1):
-        ymin = min(ymin, axis[cluster][2].get_ylim()[0])
-        ymax = max(ymax, axis[cluster][2].get_ylim()[0])
+        # same range for DMA event for all clusters
+        # axis = [cluster][ax_stat_smem, ax_stat_pe, ax_dma]
+        ymin = axis[0][2].get_ylim()[0]
+        ymax = axis[0][2].get_ylim()[1]
+        for cluster in range(1, max_cluster+1):
+            ymin = min(ymin, axis[cluster][2].get_ylim()[0])
+            ymax = max(ymax, axis[cluster][2].get_ylim()[0])
 
-    axis[0][2].set_ylim([ymin, ymax])
-    axis[1][2].set_ylim([ymin, ymax])
+        axis[0][2].set_ylim([ymin, ymax])
+        axis[1][2].set_ylim([ymin, ymax])
 
     # display
     # plt.show(block=False)
     plt.show()
-
 
 # filename = "data/ToKalray12JUL22/CCL_file.txt"  # RX v2
 # filename = "data/ToKalray05JUL22/CCL_file.txt"  # RX working memory

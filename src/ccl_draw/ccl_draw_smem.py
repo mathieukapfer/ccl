@@ -106,22 +106,22 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
 
         # draw define bloc
         x1 = int(node.get('define', 0))
-        y1 = int(node.get('define memory offset', 0))
+        y1 = int(node.get('define memory offset', -1))
         x2 = int(node.get('end_define', 0)) + 1
         y2 = y1 + int(node.get('elementsize', 0))
 
-        if y1 > 0:
-            print("Define: cluster:{}".format(cluster_define))
+        if y1 >= 0:
+            logger.info("Define: cluster:{}".format(cluster_define))
             draw_rectangle(ax_def, color_define, x1, y1, x2, y2)
             ax_def.annotate(name_def, (x1, y1), fontsize=7)
 
         # draw working buffer bloc :
-        # same timing as 'define bloc (x) , just other memory offset and size (y)
-        y1m = int(node.get('internal memory offset', 0))
+        # same timing as define bloc (x), just other memory offset and size (y)
+        y1m = int(node.get('internal memory offset', -1))
         y2m = y1m + int(node.get('internal memory', 0))
 
-        if y1m > 0:
-            print("Working buffer: cluster:{}".format(cluster_define))
+        if y1m >= 0:
+            logger.info("Working buffer: cluster:{}".format(cluster_define))
             draw_rectangle(ax_def, "coral", x1, y1m, x2, y2m)
             ax_def.annotate(name_def + ".", (x1, y1m), fontsize=7)
 
@@ -133,8 +133,8 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
         x1 = x2
         x2 = int(node.get('L2toL2', node.get('L2toDDR', node.get('observe_start'))))
 
-        if y1 > 0:
-            print("Shadow: cluster:{}".format(cluster_define))
+        if y1 >= 0:
+            logger.info("Shadow: cluster:{}".format(cluster_define))
             draw_rectangle(ax_def, 'gray', x1, y1, x2, y2)
 
         # keep data to draw arrow later
