@@ -11,21 +11,8 @@ else
     WORKON_HOME=`$SRC_HOME/../get_pipenv_path`
 fi
 
+# get actual dirname that will be added in filename by python script
+dirname=$(cd "$(dirname "$0")"; pwd)
 
-# basic checker
-if (($# < 1))
-then
-    echo
-    echo "Usage $0 <inputfile>"
-    echo
-elif [ -f "$1" ]
-then
-    # translate relative path of arg 1 to absolute path
-    # (okay, realpath do the same, but that's so funny)
-    inputfile=$(cd "$(dirname "$1")"; pwd)/$(basename "$1")
-
-    # run
-    cd $SRC_HOME && pipenv sync && pipenv run python ccl_draw_main.py $inputfile && cd -
-else
-    echo "File '$1' not found"
-fi
+# add dir name in command line as first argument
+cd $SRC_HOME && pipenv sync && pipenv run python ccl_draw_main.py $dirname $* && cd -

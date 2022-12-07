@@ -8,6 +8,11 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 
 import pickle as plk
 
+import logging
+
+# create logger
+logger = logging.getLogger("ccl.viewer.smem")
+
 
 def draw_rectangle(ax, color, x1, y1, x2, y2):
     """
@@ -22,7 +27,7 @@ def draw_rectangle(ax, color, x1, y1, x2, y2):
                   ec=color,
                   # lw=10
         ))
-    print("({},{}) ({},{})".format(x1, y1, x2, y2))
+    logger.debug("({},{}) ({},{})".format(x1, y1, x2, y2))
 
 
 def draw_arrow(fig, last_axes, axes_tail, axes_head, x1, y1, x2, y2, style):
@@ -37,7 +42,7 @@ def draw_arrow(fig, last_axes, axes_tail, axes_head, x1, y1, x2, y2, style):
                           color=style['color'],
                           zorder=5,
     )
-    print('Arrow {},{}->{},{}'.format(x1, y1, x2, y2))
+    logger.debug('Arrow {},{}->{},{}'.format(x1, y1, x2, y2))
     last_axes.add_artist(con)
 
 
@@ -88,13 +93,12 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
 
     for index in nodes:
         node = nodes[index]
+        logger.debug("SMEM processing of {}".format(node))
+        logger.info("SMEM processing of id: {}".format(node.get('id')))
 
         # identify define cluster
         cluster_define = node.get('cluster')
         ax_def = ax_clusters[cluster_define]
-
-        # log
-        # print(node)
 
         # name = "{}({})".format(node.get('action'),node.get('id'))
         name_def = "{}({})".format(node.get('id'), node.get('phase-def'))
@@ -150,14 +154,13 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
                 for (obs, pos) in obs_list:
                     if obs == node.get('id'):
                         resource = nodes[key_obs]['defining resource']
-                        print("found obs {} run on {}".format(nodes[key_obs]['id'], resource))
+                        logger.info("found obs {} run on {}".format(nodes[key_obs]['id'], resource))
                         cluster_observes.append(nodes[key_obs]['cluster'])
         else:
             # no data mvt, observer(s) are in the same cluster as definer
             cluster_observes.append(cluster_define)
         # save observer cluster in node for futur usage
         node['cluster_observes'] = cluster_observes
-        print(node)
 
         # draw observers's items
         for cluster_observe in list(set(cluster_observes)):
@@ -171,7 +174,7 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
             y2 = y1 + int(node.get('elementsize', 0))
 
             if y1 >= 0:
-                print("Observe: cluster:{}".format(cluster_observe))
+                logger.info("Observe: cluster:{}".format(cluster_observe))
                 draw_rectangle(ax_obs, color_observe, x1, y1, x2, y2)
 
             # draw shadow region & arrow
@@ -181,7 +184,7 @@ def draw_smem_map(nodes, fig, last_ax, ax_clusters):
             x1 = int(node.get('L2toL2', node.get('DDRtoL2', -1)))
             x2 = int(node.get('observe_start', 0))
             if x1 >= 0:
-                print("Shadow: cluster:{}".format(cluster_observe))
+                logger.info("Shadow: cluster:{}".format(cluster_observe))
                 # rectangle
                 draw_rectangle(ax_obs, 'gray', x1, y1, x2, y2)
                 # text
@@ -219,7 +222,7 @@ def get_broadcast_source(nodes, node):
             loop_node.get('define') == node.get('define')):
             offset = int(loop_node.get('define memory offset'))
             if offset > 0:
-                print(">Broadcast source found: {} @ {}".format(
+                logger.info(">Broadcast source found: {} @ {}".format(
                     loop_node.get('action'),
                     loop_node.get('define memory offset')))
                 return offset
@@ -257,7 +260,7 @@ def test_draw_smem_layout():
         if node['cluster'] > max_cluster:
             max_cluster = node['cluster']
 
-    print("max cluster: {}".format(max_cluster))
+    logger.info("max cluster: {}".format(max_cluster))
 
     # stats by cluster
     ax_clusters = list()

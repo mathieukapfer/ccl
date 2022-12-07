@@ -1,10 +1,18 @@
+import argparse
+import logging
+
 import matplotlib.pyplot as plt
 
 from ccl_parser.ccl_parse2 import ccl_file_parser
 from ccl_draw.ccl_draw_smem import draw_smem_map
 from ccl_draw.ccl_draw_stat import draw_stat
 
-import sys, getopt
+import sys
+
+# create logger
+logger_root = logging.getLogger("ccl")
+logger = logging.getLogger("ccl.viewer")
+
 
 def ccl_draw(filename):
     """
@@ -19,7 +27,7 @@ def ccl_draw(filename):
         node = nodes[node_index]
         if node['cluster'] > max_cluster:
             max_cluster = node['cluster']
-    print("max cluster: {}".format(max_cluster))
+    logger.debug("max cluster: {}".format(max_cluster))
 
 
     # build fig spec according to nb clusters
@@ -37,7 +45,7 @@ def ccl_draw(filename):
         mosaic[2].append('dma{}'.format(i))
         width_ratios.append(1)
 
-    print("mosaic: {}".format(mosaic))
+    logger.debug("mosaic: {}".format(mosaic))
 
     # define style
     plt.style.use('seaborn')
@@ -92,7 +100,7 @@ def ccl_draw(filename):
 
     # draw smem usage
     draw_smem_map(nodes, fig,
-                  axd['cluster {}'.format(max_cluster-1)],  # last axes carry the arrows
+                  axd['cluster {}'.format(max_cluster)],  # last axes carry the arrows
                   smem_axis  # smem figures
                   # [axd['cluster 1'], axd['cluster 2']]
     )
@@ -142,9 +150,45 @@ def ccl_draw(filename):
 
 # filename = 'data/CCL_file_2cblk.txt'
 # filename = 'data/ccl_file_12May22.txt'
-# filename = 'data/CCL_file_test_smem_svg.txt'
+# filename = '../data/CCL_file_test_smem_svg.txt'
+# filename = "../../oran_tests/test/CCL_file_TXRX.txt"
 
-# ccl_draw()
+# ccl_draw(filename)
 
 if __name__ == "__main__":
-    ccl_draw(sys.argv[1])
+
+    # uncomment these lines to debug arg
+    # for arg in sys.argv:
+    #    print("'{}' ".format(arg))
+
+    # declare parser
+    parser = argparse.ArgumentParser(description='Display CCL file diagram')
+    parser.add_argument('dirname', nargs='?', help='The CCL file directory')
+    parser.add_argument('filename', nargs=1, help='The CCL file to parse')
+    parser.add_argument('-v', dest='verbose', action='store',
+                        default=0, help='enable verbose mode: 1=info, 2=debug')
+
+    # parse
+    args = parser.parse_args()
+
+    # set user information level
+    if int(args.verbose) >= 2:
+        logger_root.level = logging.DEBUG
+        logging.debug("enable log")
+    elif int(args.verbose) >= 1:
+        logger_root.level = logging.INFO
+        logging.info("enable log")
+
+    # else:
+    #    sys.tracebacklimit = 0  # no backtrace
+
+    # print(args)
+
+    # add directory if present
+    if args.dirname is not None:
+        filename_ = args.dirname + '/' + args.filename[0]
+    else:
+        filename_ = args.filename[0]
+
+    # go !
+    ccl_draw(filename_)

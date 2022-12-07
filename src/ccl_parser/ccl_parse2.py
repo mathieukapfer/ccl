@@ -1,5 +1,10 @@
 import re
 
+import logging
+
+# create logger
+logger = logging.getLogger("ccl.parser")
+
 # Syntaxe
 
 comment = "#.*$"
@@ -134,7 +139,7 @@ def ccl_file_parser(filename):
     for line in lines:
         pos = 0
         found = True
-        # print(line)
+        # logger.debug(line)
 
         # 0) skip comment
         if line[0] == '#':
@@ -159,14 +164,14 @@ def ccl_file_parser(filename):
             found = False  # simulate do .. while loop
             for key in keywords:
                 exp = ccl_item(key)
-                # print(exp)
+                # logger.debug(exp)
                 m = re.match(exp, line[pos:])
                 if m:
 
                     # update loop parameters
                     found = True
                     nb_keys_found += 1
-                    print("===>" + key + ":" + m.group(1))
+                    logger.debug("===>" + key + ":" + m.group(1))
 
                     # parse node
                     ccl_item_parser(key, m.group(1), node_dict)
@@ -181,23 +186,23 @@ def ccl_file_parser(filename):
             if len(node_dict) > 0 and m:
                 pos += m.end()
                 nodes_dict[node_dict.get('id', 'none')] = node_dict.copy()
-                print(node_dict)
+                logger.info(node_dict)
                 node_dict.clear()
             # still something ?
             elif not re.match("[\b ,\n]+$", line[pos:]):
                 error = True
-                print("Skip: " + line[pos:])
+                logger.warning("Skip: " + line[pos:])
 
     # status
     if error is False:
         print("\n\nNo error found:")
         print(" {} keywords found".format(nb_keys_found))
-        print(" {} nodes detected".format(len(nodes_dict)))
-        print(nodes_dict)
+        print(" {} nodes detected\n".format(len(nodes_dict)))
+        logger.debug(nodes_dict)
         return nodes_dict
     else:
         print("\n\nError bound - see above what has been 'Skip'")
-        return()
+        return
 
 
 #if __name__ == "__main__":

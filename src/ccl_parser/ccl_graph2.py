@@ -1,5 +1,7 @@
 import networkx as nx
 
+import logging
+
 
 def format_node_name(node):
     """
@@ -13,8 +15,8 @@ def format_node_name(node):
     else:
         phase_str = "{}->{}".format(node.get('phase-def'),
                                     node.get('phase-obs'))
-    print(node)
-    print(phase_str)
+    logging.debug(node)
+    logging.debug(phase_str)
 
     return "{}\n ({})\n phase{}".format(
         #\n size:{} \n runtime:{}
@@ -59,7 +61,7 @@ def build_stream_graph(nodes_dict):
             }
             ), ])
 
-    print("\n {}".format(nodes_name_dict))
+    logging.debug("\n {}".format(nodes_name_dict))
 
     return G
 

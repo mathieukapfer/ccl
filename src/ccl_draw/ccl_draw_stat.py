@@ -2,6 +2,12 @@
 import matplotlib.pyplot as plt
 from ccl_parser.ccl_parse2 import ccl_file_parser
 
+import logging
+
+# create logger
+logger = logging.getLogger("ccl.viewer.stat")
+
+
 # const
 SMEM_rate = 2*1024*1024/100  # percent of 2MB memory
 
@@ -20,6 +26,11 @@ def create_dma_event(date, event, value, isMaster):
            - DMA bandwith usage: TODO
     """
     dma_event = list()
+
+    # check
+    if value == 0:
+        logger.warning("Warning: DMA {} with null size at time: {} [ismaster={}]".format(
+            event, date, isMaster))
 
     # DMA model
     bus_througput = 16  # 16 B/cycle
@@ -41,13 +52,12 @@ def create_dma_event(date, event, value, isMaster):
 
 
     # Compute DMA master event
-    if(isMaster):
+    if isMaster:
         # adding rising and falling edge for 'DMA (master) event'
         delta = 1
         rising_event = {'date': date, 'event': 'DMA event', 'value': delta}
         falling_event = {'date': date+1, 'event': 'DMA event', 'value': -1 * delta}
         dma_event.extend([rising_event, falling_event])
-
 
     return dma_event
 
@@ -121,7 +131,8 @@ def stat_create_events(nodes, max_cluster):
             # Create DMA events
             HACK = True
             if(HACK):
-                print("DMA processing of: {}".format(node))
+                logger.debug("DMA processing of: {}".format(node))
+                logger.info("DMA processing of id: {}".format(node.get('id')))
                 # L2 -> DDR
                 if int(node.get('L2toDDR', -1)) >= 0:
                     new_events = create_dma_event(
@@ -131,7 +142,7 @@ def stat_create_events(nodes, max_cluster):
                         # TODO: same for all similar lines below
                         value=int(node.get('elementsize')),
                         isMaster=True)
-                    print("DMA:cluster{}:{}".format(cluster, new_events))
+                    logger.info("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
                 # DDR -> L2
                 if int(node.get('DDRtoL2', -1)) >= 0:
@@ -140,18 +151,18 @@ def stat_create_events(nodes, max_cluster):
                         new_events = create_dma_event(
                             date=int(node.get('DDRtoL2')),
                             event='DDRtoL2',
-                            value=int(node.get('elementsize')),
+                            value=int(node.get('elementsize',0)),
                             isMaster=True)
-                        print("DMA:cluster{}:{}".format(cluster_obs, new_events))
+                        logger.info("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
                 if int(node.get('L2toL2', -1)) >= 0:
                     # L2 -> L2 (send)
                     new_events = create_dma_event(
                         date=int(node.get('L2toL2')),
                         event='L2toL2',
-                        value=int(node.get('elementsize')),
+                        value=int(node.get('elementsize', 0)),
                         isMaster=False)
-                    print("DMA:cluster{}:{}".format(cluster, new_events))
+                    logger.info("DMA:cluster{}:{}".format(cluster, new_events))
                     events[cluster].extend(new_events)
                     # L2 -> L2 (receive)
                     clusters_obs = node.get('cluster_observes', [])
@@ -159,9 +170,9 @@ def stat_create_events(nodes, max_cluster):
                         new_events = create_dma_event(
                             date=int(node.get('L2toL2')),
                             event='L2toL2',
-                            value=int(node.get('elementsize')),
+                            value=int(node.get('elementsize',0)),
                             isMaster=True)
-                        print("DMA:cluster{}:{}".format(cluster_obs, new_events))
+                        logger.info("DMA:cluster{}:{}".format(cluster_obs, new_events))
                         events[cluster_obs].extend(new_events)
 
 
@@ -190,12 +201,12 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
     for event in sorted_events:
         date = event['date']
 
-        print("time:{}, integrated value:{}".format(
+        logger.debug("time:{}, integrated value:{}".format(
             event['date'], integrated_value))
 
         if (previous_date != date):
             # added new point previously computed
-            print("plot {},{}, {},{}".format(
+            logger.debug("plot {},{}, {},{}".format(
                 previous_date, integrated_value,
                 previous_date, previous_integrated_value,
             ))
@@ -208,9 +219,9 @@ def stat_integrate_events_with_edge(sorted_events, rate=1):
             previous_integrated_value = integrated_value
 
         # sum each event of the same date
-        # print(event)
+        # logger.debug(event)
         integrated_value += event['value']
-        print("delta {},{}".format(date, integrated_value))
+        logger.debug("delta {},{}".format(date, integrated_value))
 
     # add last point
     x.append(date)
@@ -256,10 +267,10 @@ def draw_stat_events(events, stat_axis, dma_axis):
         cluster = events.index(events_by_cluster)
         sorted_cluster_events = sorted(events_by_cluster, key=lambda item: item['date'])
 
-        print(sorted_cluster_events)
+        logger.debug(sorted_cluster_events)
 
         # define axis
-        print("cluster={}".format(cluster))
+        logger.debug("cluster={}".format(cluster))
         ax_stat_pe = stat_axis[cluster].twinx()
         ax_stat_smem = stat_axis[cluster]
 
@@ -321,7 +332,7 @@ def draw_stat(nodes, max_cluster, stat_axis, dma_axis):
        - ax: list of axes to display statistics, one per cluster
     """
     events = stat_create_events(nodes, max_cluster)
-    # print(events)
+    # logger.debug(events)
     return draw_stat_events(events, stat_axis, dma_axis)
 
 
@@ -333,7 +344,7 @@ def test_stat():
 
     # parse ccl file
     nodes = ccl_file_parser(filename)
-    # print(nodes)
+    # logger.debug(nodes)
 
     # check nb clusters
     max_cluster = 0
@@ -342,19 +353,19 @@ def test_stat():
         if node['cluster'] > max_cluster:
             max_cluster = node['cluster']
 
-    print("max cluster: {}".format(max_cluster))
+    logger.debug("max cluster: {}".format(max_cluster))
 
     # stats by cluster
     stat_axis = list()
     dma_axis = list()
     for cluster in range(0, max_cluster + 1):
-        print("{}{}{}".format(
+        logger.debug("{}{}{}".format(
             2, max_cluster + 1, 1 + cluster)
         )
         stat_axis.append(fig.add_subplot(
             2, max_cluster + 1, 1 + cluster)
         )
-        print("{}{}{}".format(
+        logger.debug("{}{}{}".format(
             2, max_cluster + 1, max_cluster + 2 + cluster)
         )
         dma_axis.append(fig.add_subplot(
@@ -362,7 +373,7 @@ def test_stat():
         )
 
     # draw stat
-    print("stat_axis: {}".format(stat_axis))
+    logger.debug("stat_axis: {}".format(stat_axis))
     draw_stat(nodes, max_cluster, stat_axis, dma_axis)
 
     # show
