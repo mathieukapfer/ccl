@@ -127,6 +127,7 @@ def ccl_file_parser(filename):
     nb_keys_found = 0
     node_dict = dict()
     nodes_dict = dict()
+    skip_line = False
 
 
     # parse each item and build items dictionnary
@@ -139,6 +140,20 @@ def ccl_file_parser(filename):
         if line[0] == '#':
             continue
 
+        # tmp) skip function view section
+        m = re.match(ccl_item('CCLtype'), line[pos:])
+        if m and m.group(1) == 'functionalview':
+            skip_line = True
+            continue
+
+        m = re.match(endofstream, line[pos:])
+        if m:
+            skip_line = False
+            continue
+
+        if skip_line:
+            continue
+
         # 1) search keyword
         while found is True:
             found = False  # simulate do .. while loop
@@ -147,6 +162,7 @@ def ccl_file_parser(filename):
                 # print(exp)
                 m = re.match(exp, line[pos:])
                 if m:
+
                     # update loop parameters
                     found = True
                     nb_keys_found += 1
