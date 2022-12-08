@@ -8,6 +8,7 @@ from ccl_draw.ccl_draw_smem import draw_smem_map
 from ccl_draw.ccl_draw_stat import draw_stat
 
 import sys
+import os
 
 # create logger
 logger_root = logging.getLogger("ccl")
@@ -186,7 +187,7 @@ if __name__ == "__main__":
 
     # add directory if present
     if args.dirname is not None:
-        filename_ = args.dirname + '/' + args.filename[0]
+        filename_ = args.dirname + '/' + os.path.basename(args.filename[0])
     else:
         filename_ = args.filename[0]
 

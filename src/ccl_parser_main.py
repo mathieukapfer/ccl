@@ -8,6 +8,8 @@ from ccl_parser.ccl_parse2 import ccl_file_parser
 
 from ccl_graph.ccl_graph_viewer import draw_graph
 
+import os
+
 # create logger
 logger_root = logging.getLogger("ccl")
 
@@ -62,7 +64,7 @@ if __name__ == "__main__":
 
     # add directory if present
     if args.dirname is not None:
-        filename_ = args.dirname + '/' + args.filename[0]
+        filename_ = args.dirname + '/' + os.path.basename(args.filename[0])
     else:
         filename_ = args.filename[0]
 
