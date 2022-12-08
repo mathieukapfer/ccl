@@ -12,7 +12,7 @@ else
 fi
 
 # get actual dirname that will be added in filename by python script
-dirname=$(cd "$(dirname "$0")"; pwd)
+dirname=$(cd "$(dirname "$1")"; pwd)
 
 # add dir name in command line as first argument
 cd $SRC_HOME && pipenv sync && pipenv run python ccl_parser_main.py $dirname $* && cd -
